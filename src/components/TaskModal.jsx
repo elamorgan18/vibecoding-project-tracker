@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AlertCircle, AlertTriangle, Trash2, X } from 'lucide-react';
 import { STAGES, TASK_TYPES } from '../data/model.js';
-
-const TYPE_LABELS = { feature: 'Feature', bug: 'Bug' };
+import TypeBadge, { TYPE_META } from './TypeBadge.jsx';
 
 const EMPTY_FORM = {
   title: '',
@@ -124,13 +123,18 @@ export default function TaskModal({ task, members, onSave, onDelete, onClose }) 
         aria-labelledby="task-modal-title"
         className="w-full max-w-lg rounded border border-line bg-card shadow-xl"
       >
-        <header className="flex items-start justify-between border-b border-line px-5 py-4">
+        <header
+          className={`flex items-start justify-between rounded-t border-b border-line px-5 py-4 ${TYPE_META[form.type].tint}`}
+        >
           <div>
-            <h2 id="task-modal-title" className="text-base font-semibold text-ink">
-              {isEdit ? 'Edit task' : 'New task'}
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 id="task-modal-title" className="text-base font-semibold text-ink">
+                {isEdit ? 'Edit task' : 'New task'}
+              </h2>
+              <TypeBadge type={form.type} />
+            </div>
             {isEdit && (
-              <p className="mt-0.5 font-mono text-xs text-muted">
+              <p className="mt-0.5 font-mono text-xs text-ink-soft">
                 {task.id} · created {task.createdDate}
               </p>
             )}
@@ -138,7 +142,7 @@ export default function TaskModal({ task, members, onSave, onDelete, onClose }) 
           <button
             type="button"
             onClick={onClose}
-            className="rounded p-1 text-muted hover:bg-muted-bg hover:text-ink focus:outline-none focus:ring-2 focus:ring-brand"
+            className="rounded p-1 text-ink-soft hover:bg-card hover:text-ink focus:outline-none focus:ring-2 focus:ring-brand"
           >
             <X aria-hidden="true" className="h-5 w-5" />
             <span className="sr-only">Close</span>
@@ -182,15 +186,34 @@ export default function TaskModal({ task, members, onSave, onDelete, onClose }) 
             </Field>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Field id="task-type" label="Type">
-                <select id="task-type" value={form.type} onChange={update('type')} className={`${inputClass} border-line`}>
-                  {TASK_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {TYPE_LABELS[type]}
-                    </option>
-                  ))}
-                </select>
-              </Field>
+              <fieldset>
+                <legend className="mb-1 block text-sm font-medium text-ink">Type</legend>
+                <div className="grid grid-cols-2 gap-2">
+                  {TASK_TYPES.map((type) => {
+                    const { label, Icon, icon, selected } = TYPE_META[type];
+                    const checked = form.type === type;
+                    return (
+                      <label
+                        key={type}
+                        className={`flex cursor-pointer items-center justify-center gap-1.5 rounded border px-3 py-2 text-sm font-medium focus-within:ring-2 focus-within:ring-brand ${
+                          checked ? selected : 'border-line text-ink-soft hover:bg-muted-bg'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="task-type"
+                          value={type}
+                          checked={checked}
+                          onChange={update('type')}
+                          className="sr-only"
+                        />
+                        <Icon aria-hidden="true" className={`h-4 w-4 ${checked ? icon : ''}`} />
+                        {label}
+                      </label>
+                    );
+                  })}
+                </div>
+              </fieldset>
 
               <Field id="task-status" label="Status">
                 <select id="task-status" value={form.status} onChange={update('status')} className={`${inputClass} border-line`}>

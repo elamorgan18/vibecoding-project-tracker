@@ -62,29 +62,39 @@ How each one is shown. Every use always pairs the colour with an icon **and** te
 - **Form error:** `danger` input border, `alert-circle` icon, message in `danger-text` below the field.
 - **Overdue card:** `due-overdue`, which shares the `danger` values (see §2.4).
 
-### 2.3 Task type (M6 `tag-style`): corner badge + icon
+### 2.3 Task type (M6 `tag-style`): card background tint + border + corner icon and label
 
-| Token | Base (icon, fill) | `-soft` (badge bg) | `-text` (badge label) | Icon (Lucide) | Label |
+| Token | Base (card border, icon) | `-soft` (card bg, modal header bg) | `-text` (badge label) | Icon (Lucide) | Label |
 |---|---|---|---|---|---|
 | `feature` | `#7C3AED` | `#F5F3FF` | `#6D28D9` | `sparkles` | "Feature" |
 | `bug` | `#E11D48` | `#FFF1F2` | `#BE123C` | `bug` | "Bug" |
 
+- **Card:** the whole card background is the type's `-soft` tint, with a thin (1px) border in the base type colour.
+- **Corner badge:** the top-right corner always shows the type's icon and label ("Feature" / "Bug") in a white pill. Type never relies on colour alone.
+- **Modal:** the modal header uses the same tint, plus the same badge.
+- **Captions on tinted cards** (task ID, assignee) use `ink-soft`, not `muted`, because `muted` fails AA on both tints (§2.6).
+
 Feature is **violet** and bug is **rose**: not a red/green pair, and violet is clearly separate from the blue brand colour. `feature` already passes AA as text (5.20:1 on its tint). `feature-text` exists only to match the other badges.
 
-### 2.4 Due-date state (M8 `due-tint`): left border + card background tint
+### 2.4 Due-date state (M8 `due-tint`): left border + due-date chip
 
-| Token | Base (left border) | `-soft` (card bg) | `-text` (date label) | Icon (Lucide) | Label |
+Due state is shown **only** by a thicker left border in the due colour and a due-date chip (icon + text). It **never** changes the card background, which belongs to the task type (§2.3). The left border replaces the type border on the left edge only; the other three sides keep the type colour.
+
+| Token | Base (left border) | `-soft` (chip bg) | `-text` (chip label) | Icon (Lucide) | Label |
 |---|---|---|---|---|---|
 | `due-calm` | `#0EA5E9` | `#F0F9FF` | `#0369A1` | `calendar` | "Due {date}" |
 | `due-warning` | `#D97706` | `#FFFBEB` | `#B45309` | `clock` | "Due soon" |
 | `due-overdue` (= `danger`) | `#DC2626` | `#FEF2F2` | `#B91C1C` | `alert-triangle` | "Overdue" |
 | `due-done` | `#94A3B8` | `#F1F5F9` | `#475569` | `check-circle` | "Done" |
 
-`due-calm` covers more than 24 hours out, `due-warning` less than 24 hours, `due-overdue` past due. `due-done` overrides the date once a task's status is Done. Tasks with no due date stay plain white with a `line` border. In `tailwind.config.js`, `due-overdue` is defined as the same object as `danger`, so the two can't drift apart.
+`due-calm` covers more than 24 hours out, `due-warning` less than 24 hours, `due-overdue` past due. `due-done` overrides the date once a task's status is Done. Tasks with no due date have no chip and no due border; they keep the type border on all sides. In `tailwind.config.js`, `due-overdue` is defined as the same object as `danger`, so the two can't drift apart.
 
 ### 2.5 How colour is used
 
-- **Two card channels that never clash.** Task type lives only in the **corner badge** (icon + label). Due state lives only in the card's **left border and background tint**, plus a date label with its icon. A card can be "bug + overdue" without the reds competing: the badge is a small pill, the tint is the whole card.
+- **Two card channels that never clash.**
+  - **Task type** is shown by the card's **background tint** and thin border, backed up by the **corner icon + label**.
+  - **Due state** (M8) is shown **only** by the card's **left border** and a **due-date chip** with icon and text. It never changes the background.
+  - A card can be "bug + overdue": a rose card with a red left border and an "Overdue" chip. Each meaning is still carried by its own icon and text.
 - **Success and danger mean one thing each.** Green only ever means "done / confirmed". Red (`danger`) only ever means "destructive, wrong or late".
 - **Never colour alone.** Every coloured element is paired with an icon *and* a text label, so colour-blind users and grayscale screenshots lose nothing.
 - **Text uses `-text` shades.** Base colours are for borders, icons and fills. Any coloured *text* uses the `-text` shade.
@@ -112,6 +122,8 @@ AA requires 4.5:1 for normal text and 3:1 for large text (≥ 18.66 px bold / 24
 | `brand-hover` #1D4ED8 | `brand-soft` | 6.16 | ✅ |
 | `feature` #7C3AED | `card` / `feature-soft` | 5.70 / 5.20 | ✅ |
 | `feature-text` #6D28D9 | `feature-soft` / `card` | 6.48 / 7.10 | ✅ |
+| `ink` #020817 (card title) | `feature-soft` / `bug-soft` (tinted cards) | 18.24 / 18.21 | ✅ |
+| `ink-soft` #475569 (task ID, assignee) | `feature-soft` / `bug-soft` (tinted cards) | 6.91 / 6.90 | ✅ |
 | white | `feature` #7C3AED | 5.70 | ✅ |
 | `bug-text` #BE123C | `bug-soft` / `card` | 5.72 / 6.29 | ✅ |
 | `success-text` #15803D | `success-soft` / `card` | 4.79 / 5.02 | ✅ |
@@ -137,7 +149,7 @@ AA requires 4.5:1 for normal text and 3:1 for large text (≥ 18.66 px bold / 24
 | `due-warning` #D97706 | `card` | 3.19 ❌ |
 | `due-done` #94A3B8 | `card` | 2.56 ❌ |
 
-**Non-text graphics (3:1).** The `success` dot and Done column accent pass at 3.30:1 on `card` and 3.15:1 on `surface`. `line` (1.23:1) and the `due-calm` / `due-done` left borders (2.77 / 2.56:1) are below 3:1. That's acceptable because they're decorative: borders aren't the only way to identify a card, and due state is always repeated in the date label and icon. Input borders must still show a `brand` focus ring (5.17:1).
+**Non-text graphics (3:1).** The type card borders pass against the column's `muted-bg`: `feature` 5.20:1, `bug` 4.29:1. The type icons pass on the white badge pill: `feature` 5.70:1, `bug` 4.70:1. The `success` dot and Done column accent pass at 3.30:1 on `card` and 3.15:1 on `surface`. `line` (1.23:1) and the `due-calm` / `due-done` left borders (2.77 / 2.56:1) are below 3:1. That's acceptable because they're decorative: borders aren't the only way to identify a card, and due state is always repeated in the date label and icon. Input borders must still show a `brand` focus ring (5.17:1).
 
 ## 3. Typography
 
@@ -159,7 +171,7 @@ Sizes:
 
 ## 4. Component principles
 
-Cards are white with a 1px `line` border, the 6 px theme radius, and a soft shadow that only appears on hover. They gain a coloured left border and tint only when their due date has something to say. Buttons are solid `brand` with white text, `rounded`, and generous padding; secondary actions are plain text links, so there is only ever one loud button on screen, and the only red button is "Delete task" with its trash icon. The modal is centred, `max-w-lg`, on a `ink` backdrop at 40% opacity, with the Context field set in JetBrains Mono so prompts read like the code they produce, and form errors appear inline under the field in `danger-text` with an alert icon. Columns sit on `muted-bg`. Empty columns use a dashed `line` border with a short `ink-soft` line of encouragement, and status changes go through a dropdown (no drag-and-drop), so moving a task is always one deliberate click.
+Cards are tinted by type (`feature-soft` or `bug-soft`) with a 1px border in the type colour, the 6 px theme radius, a white icon + label badge in the top-right corner, and a soft shadow that only appears on hover. They gain a thicker coloured left border and a due-date chip only when their due date has something to say. Buttons are solid `brand` with white text, `rounded`, and generous padding; secondary actions are plain text links, so there is only ever one loud button on screen, and the only red button is "Delete task" with its trash icon. The modal is centred, `max-w-lg`, on a `ink` backdrop at 40% opacity, with the Context field set in JetBrains Mono so prompts read like the code they produce, and form errors appear inline under the field in `danger-text` with an alert icon. Columns sit on `muted-bg`. Empty columns use a dashed `line` border with a short `ink-soft` line of encouragement, and status changes go through a dropdown (no drag-and-drop), so moving a task is always one deliberate click.
 
 ## 5. Voice / microcopy
 

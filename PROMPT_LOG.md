@@ -151,3 +151,29 @@ M5: Add a "+" button that opens a modal with every task field. Clicking a card o
 ````
 
 **Summary:** Added `src/components/TaskModal.jsx` (create/edit form, title validation, inline delete confirmation, focus handling) and `src/data/tasks.js` (ID/date/upsert/remove helpers). Wired it into `src/App.jsx`, made cards clickable (`TaskCard.jsx`, `Column.jsx`, `Board.jsx`), tested create/edit/delete/reload in jsdom (23/23 passed), and filled in `docs/decisions/M5-crud-modal.md`.
+
+## M6 – tag-style
+
+### 2026-10-20 12:26 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+M6: Feature tasks use one accent colour and bug tasks another (from our tokens), each with a small icon in the card corner. Apply the same colour and icon wherever a task appears, including the modal. Fill in the factual sections of docs/decisions/M6-tag-style.md.
+````
+
+**Summary:** Added `src/components/TypeBadge.jsx` (shared colour + icon + label per type). Placed it in the card's top-right corner (`TaskCard.jsx`), and in the modal header and a new icon radio type picker (`TaskModal.jsx`). Tested in jsdom (31/31 passed) and filled in `docs/decisions/M6-tag-style.md`.
+
+### 2026-10-20 12:30 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Update M6: give each card a soft background tint by type: feature cards use the feature soft colour, bug cards use the bug soft colour, with a thin border in the stronger type colour. Keep the icon and "Feature"/"Bug" label in the corner so meaning never relies on colour alone. Apply the same tint in the modal header. Check that card text still meets WCAG AA contrast on both tints. Update DESIGN.md: type is shown by card background tint + icon + label; due-date state (M8) will be shown only by the card's left border and a due-date chip with icon and text, not the background. Record the change in docs/decisions/M6-tag-style.md (factual sections only).
+````
+
+**Summary:** Cards and the modal header are now tinted by type with a thin type-colour border, and the corner badge is a white pill (`TypeBadge.jsx`, `TaskCard.jsx`, `TaskModal.jsx`). Captions switched from `muted` (fails AA on tints) to `ink-soft`. Updated `DESIGN.md` §2.3–2.6 and §4 (type = tint + icon + label; M8 due = left border + chip), tested in jsdom (35/35 passed), and recorded the update in `docs/decisions/M6-tag-style.md`.
