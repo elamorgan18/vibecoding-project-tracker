@@ -1,5 +1,17 @@
 # Vibecoding Project Tracker — Hackathon Starter
 
+## About this repo
+
+This is Ela Morgan's personal project repo for the Vibecoding Project Tracker ([elamorgan18/vibecoding-project-tracker](https://github.com/elamorgan18/vibecoding-project-tracker)). It's a solo build, forked from the hackathon starter described below. Team members shown in the app are mock data that represent the product's target users, not real collaborators. Project rules are in `CLAUDE.md`, and every AI prompt is logged in `PROMPT_LOG.md`.
+
+## AI tools used
+
+This project was built with [Claude Code](https://claude.com/claude-code).
+
+| Model | Model ID |
+|---|---|
+| Claude Opus 5.5 | `claude-opus-5-5` |
+
 You're forking this repo as the starting point for the **UXD Vibecoding Hackathon 2026**. The goal of the hackathon is to ship a Vibecoding Project Tracker in ~3 hours: a Kanban-style tool that tracks your vibecoding tasks and stores the prompts that produced them.
 
 This starter gives you:

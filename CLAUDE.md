@@ -46,3 +46,7 @@ After every request from the user, append an entry to `PROMPT_LOG.md` under a he
 4. A one- or two-line summary of what changed and which files
 
 Never edit or delete earlier entries. Only append.
+
+## AI tools used (README)
+
+`README.md` has an "AI tools used" section listing every Claude model used on this project (name and model ID). At the start of each session, check it. If the model you are running isn't listed, add it as a new row. Never remove earlier models.

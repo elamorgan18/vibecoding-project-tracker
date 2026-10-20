@@ -41,3 +41,17 @@ git push
 ````
 
 **Summary:** Did not run the commands, because `CLAUDE.md` says never to run git commit/push. Suggested running them with the `!` prefix instead. Only `PROMPT_LOG.md` changed (this entry).
+
+## M1 – git-linked
+
+### 2026-10-20 11:12 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+M1: Add a section to README.md saying this is my project repo, and an "AI tools used" section stating that it was built with Claude Code, including the exact Claude model name and model ID you are running. Add a rule to CLAUDE.md: if the model changes in a later session, update that README section to list every model used.
+````
+
+**Summary:** Added "About this repo" and "AI tools used" sections (Claude Opus 5.5, `claude-opus-5-5`) to `README.md`. Added a rule to `CLAUDE.md` that keeps the model list current across sessions.
