@@ -33,13 +33,13 @@ export default function TeamMembersStrip({ members, tasks, onOpenTask }) {
                   </div>
                 </div>
                 {driving.length > 0 && (
-                  <ul className="mt-2 space-y-1">
+                  <ul className="mt-1">
                     {driving.map((task) => (
                       <li key={task.id}>
                         <button
                           type="button"
                           onClick={() => onOpenTask(task)}
-                          className="flex w-full items-baseline gap-1.5 rounded text-left text-xs text-ink hover:text-brand-hover hover:underline focus:outline-none focus:ring-2 focus:ring-brand"
+                          className="flex w-full items-baseline gap-1.5 rounded py-1 text-left text-xs text-ink hover:text-brand-hover hover:underline focus:outline-none focus:ring-2 focus:ring-brand"
                         >
                           <span className="shrink-0 font-mono text-muted">{task.id}</span>
                           <span className="truncate">{task.title}</span>

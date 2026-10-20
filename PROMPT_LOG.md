@@ -470,3 +470,15 @@ Both must be keyboard accessible and work in dark mode. Update DESIGN.md and log
 ````
 
 **Summary:** Added a "Type" menu (Feature / Bug with their icons and type colours) to the filter bar, with "Type:" chips, Clear filters and the result count covering it (`src/data/filters.js` gains `TYPE_FILTERS` and a `types` group; `src/components/FilterBar.jsx`). Deleted `src/components/DueLegend.jsx` and its use in `src/App.jsx`; the Due date menu now shows a swatch, icon, name and description per option (Calm, Due soon, Overdue, Done, No due date), using new `swatch` / `text` classes in `DUE_META` (`src/components/DueChip.jsx`). Updated `DESIGN.md` §2.4, §4 filter bar and the microcopy table. `npm run build` passes.
+
+### 2026-10-20 16:29 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Lighthouse accessibility dropped from 100 to 96. Failed audits: [paste the failed check names and affected elements]. Fix these without changing the design or behaviour. Also add a meta description to index.html for SEO. Log this in PROMPT_LOG.md.
+````
+
+**Summary:** The failed audits weren't pasted, so Lighthouse 13.5.0 was run locally on the production build. The only accessibility failure was `target-size`: the "Driving" task links in `src/components/TeamMembersStrip.jsx` were 16.8px tall. They now have `py-1` (24.8px), with the list gap and top margin reduced so the text sits where it did. Added a meta description to `index.html`. Lighthouse now gives accessibility 100 in light and dark mode and SEO 91; the remaining SEO failure is `robots-txt`, which wasn't changed.
