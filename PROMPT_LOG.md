@@ -441,3 +441,17 @@ Add an "AI tool" filter to the existing filter bar: multi-select of every AI too
 ````
 
 **Summary:** Added an "AI tool" menu to the filter bar (every tool from `AI_TOOLS` plus "No AI tool"), with "AI tool:" chips, Clear filters and the result count covering it. `src/data/filters.js` gains `AI_TOOL_FILTERS`, `NO_AI_TOOL` and a `tools` group in `NO_FILTERS` / `hasFilters` / `matchesFilters`; `src/components/FilterBar.jsx` renders the menu and chips with the existing accessible `FilterMenu`. Updated `DESIGN.md` §4 filter bar and the microcopy table. Logic checked against the 30 seed tasks (each matches exactly one AI tool option, OR/AND correct). `npm run build` passes.
+
+## M13 – pitch-ready
+
+### 2026-10-20 15:45 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Add the live link https://vibecoding-project-tracker-ela-morg.vercel.app/ to README.md under a "Live demo" heading, noting that no login or registration is needed. Log this under "## M13 – pitch-ready" in PROMPT_LOG.md.
+````
+
+**Summary:** Added a "Live demo" section to `README.md` (above "AI tools used") with the Vercel link and a note that no login or registration is needed. Started the `## M13 – pitch-ready` heading in `PROMPT_LOG.md`.

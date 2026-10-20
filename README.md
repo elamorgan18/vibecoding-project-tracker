@@ -4,6 +4,12 @@
 
 This is Ela Morgan's personal project repo for the Vibecoding Project Tracker ([elamorgan18/vibecoding-project-tracker](https://github.com/elamorgan18/vibecoding-project-tracker)). It's a solo build, forked from the hackathon starter described below. Team members shown in the app are mock data that represent the product's target users, not real collaborators. Project rules are in `CLAUDE.md`, and every AI prompt is logged in `PROMPT_LOG.md`.
 
+## Live demo
+
+**[vibecoding-project-tracker-ela-morg.vercel.app](https://vibecoding-project-tracker-ela-morg.vercel.app/)**
+
+No login or registration is needed. Open the link and the board loads with demo data. Your changes are saved in your own browser (localStorage).
+
 ## AI tools used
 
 This project was built with [Claude Code](https://claude.com/claude-code).
