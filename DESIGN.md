@@ -80,14 +80,14 @@ Feature is **violet** and bug is **rose**: not a red/green pair, and violet is c
 
 Due state is shown **only** by a thicker left border in the due colour and a due-date chip (icon + text). It **never** changes the card background, which belongs to the task type (§2.3). The left border replaces the type border on the left edge only; the other three sides keep the type colour.
 
-| Token | Base (left border) | `-soft` (chip bg) | `-text` (chip label) | Icon (Lucide) | Label |
-|---|---|---|---|---|---|
-| `due-calm` | `#0EA5E9` | `#F0F9FF` | `#0369A1` | `calendar` | "Due {date}" |
-| `due-warning` | `#D97706` | `#FFFBEB` | `#B45309` | `clock` | "Due soon" |
-| `due-overdue` (= `danger`) | `#DC2626` | `#FEF2F2` | `#B91C1C` | `alert-triangle` | "Overdue" |
-| `due-done` | `#94A3B8` | `#F1F5F9` | `#475569` | `check-circle` | "Done" |
+| Token | Base (left border) | `-soft` (chip bg) | `-text` (chip label + icon) | Icon (Lucide) | When | Chip text |
+|---|---|---|---|---|---|---|
+| `due-calm` | `#0EA5E9` | `#F0F9FF` | `#0369A1` | `calendar` | More than 2 days away | "Due in 3 days" |
+| `due-warning` | `#D97706` | `#FFFBEB` | `#B45309` | `clock` | Due today, tomorrow or in 2 days | "Due today" / "Due tomorrow" / "Due in 2 days" |
+| `due-overdue` (= `danger`) | `#DC2626` | `#FEF2F2` | `#B91C1C` | `triangle-alert` | Past the due date | "Overdue by 1 day" / "Overdue by 2 days" |
+| `due-done` | `#94A3B8` | `#F1F5F9` | `#475569` | `circle-check` | Status is Done (even if it was overdue) | "Done" |
 
-`due-calm` covers more than 24 hours out, `due-warning` less than 24 hours, `due-overdue` past due. `due-done` overrides the date once a task's status is Done. Tasks with no due date have no chip and no due border; they keep the type border on all sides. In `tailwind.config.js`, `due-overdue` is defined as the same object as `danger`, so the two can't drift apart.
+Days are counted in whole calendar days from today (local time); due dates have no time of day. The warning band is "within 2 days" (`WARNING_WITHIN_DAYS` in `src/data/due.js`), so every date that isn't "more than 2 days away" gets attention. `due-done` overrides the date once a task's status is Done. The chip icon uses the `-text` shade, not the base colour, because base `due-calm` / `due-done` are under 3:1 on their own tints (2.60 / 2.34:1). A small legend above the board explains the four states. Tasks with no due date have no chip and no due border; they keep the type border on all sides. In `tailwind.config.js`, `due-overdue` is defined as the same object as `danger`, so the two can't drift apart.
 
 ### 2.5 How colour is used
 
@@ -149,7 +149,7 @@ AA requires 4.5:1 for normal text and 3:1 for large text (≥ 18.66 px bold / 24
 | `due-warning` #D97706 | `card` | 3.19 ❌ |
 | `due-done` #94A3B8 | `card` | 2.56 ❌ |
 
-**Non-text graphics (3:1).** The type card borders pass against the column's `muted-bg`: `feature` 5.20:1, `bug` 4.29:1. The type icons pass on the white badge pill: `feature` 5.70:1, `bug` 4.70:1. The `success` dot and Done column accent pass at 3.30:1 on `card` and 3.15:1 on `surface`. `line` (1.23:1) and the `due-calm` / `due-done` left borders (2.77 / 2.56:1) are below 3:1. That's acceptable because they're decorative: borders aren't the only way to identify a card, and due state is always repeated in the date label and icon. Input borders must still show a `brand` focus ring (5.17:1).
+**Non-text graphics (3:1).** The type card borders pass against the column's `muted-bg`: `feature` 5.20:1, `bug` 4.29:1. The type icons pass on the white badge pill: `feature` 5.70:1, `bug` 4.70:1. The `success` dot and Done column accent pass at 3.30:1 on `card` and 3.15:1 on `surface`. `line` (1.23:1) and the `due-calm` / `due-warning` / `due-done` left borders are below 3:1 against the column's `muted-bg` (2.53 / 2.91 / 2.34:1; `due-overdue` is 4.41:1). That's acceptable because they're decorative: borders aren't the only way to identify a card, and due state is always repeated in the date label and icon. Input borders must still show a `brand` focus ring (5.17:1).
 
 ## 3. Typography
 

@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Plus, Users } from 'lucide-react';
 import { STORAGE_KEYS } from './data/model.js';
 import { SEED_TEAMS, SEED_PROJECTS, SEED_TASKS } from './data/seed.js';
-import { nextTaskId, reassignTask, removeTask, todayISO, unassignMember, upsertTask } from './data/tasks.js';
+import { todayISO } from './data/dates.js';
+import { nextTaskId, reassignTask, removeTask, unassignMember, upsertTask } from './data/tasks.js';
 import { addMember, removeMember } from './data/team.js';
 import { useLocalStorage } from './hooks/useLocalStorage.js';
 import Board from './components/Board.jsx';
 import DrivingStrip from './components/DrivingStrip.jsx';
+import DueLegend from './components/DueLegend.jsx';
 import TaskModal from './components/TaskModal.jsx';
 import TeamPanel from './components/TeamPanel.jsx';
 import Toast from './components/Toast.jsx';
@@ -115,6 +117,8 @@ export default function App() {
       {/* TODO M11 anchors: render the Anchor Board (Presentation / Demo / Report / Documentation) above the board. */}
 
       <DrivingStrip members={team.members} tasks={projectTasks} onOpenTask={(task) => setModal({ task })} />
+
+      <DueLegend />
 
       <Board tasks={projectTasks} members={team.members} onOpenTask={(task) => setModal({ task })} />
 

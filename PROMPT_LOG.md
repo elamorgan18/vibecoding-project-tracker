@@ -203,3 +203,17 @@ Bug fix (M7): when a card is clicked or focused it gets a purple border regardle
 ````
 
 **Summary:** The cause was the blue focus ring sitting flush against the violet/rose type border (1.10:1), so the two blended into a purple edge. In `src/components/TaskCard.jsx` I added a shared `FOCUS_RING` with a 2px `muted-bg` offset so the brand ring sits outside the type border on every card. Tested in jsdom (75/75 passed) and noted the fix in `docs/decisions/M7-task-owner.md`.
+
+## M8 – due-tint
+
+### 2026-10-20 12:47 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+M8: Show due-date urgency automatically using the card's LEFT BORDER and a small due-date chip, NOT the card background (the background is reserved for feature/bug type). Use our due-date tokens: more than 2 days away = calm, under 24 hours = warning, past due = overdue, Done = neutral (even if it was overdue). The chip shows an icon plus text, e.g. "Due in 3 days", "Due today", "Overdue by 2 days", "Done". Add a small legend explaining the four states. No new fields. Make sure some mock tasks fall into each state so all four are visible. Fill in the factual sections of docs/decisions/M8-due-tint.md.
+````
+
+**Summary:** Added `src/data/due.js` (`dueState`; 0–2 days = warning), `src/data/dates.js`, `DueChip.jsx` and `DueLegend.jsx`. Cards get a due left border and chip (`TaskCard.jsx`), the modal previews the chip (`TaskModal.jsx`), and `App.jsx` shows the legend. Seed dates are relative to today so all four states show (`seed.js`). Updated `DESIGN.md` §2.4/§2.6, tested in jsdom (97/97 passed), and filled in `docs/decisions/M8-due-tint.md`.

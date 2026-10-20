@@ -4,7 +4,16 @@
  * The team members are fictional. They represent the product's target users
  * (junior and more experienced developers building with AI tools), not real
  * collaborators.
+ *
+ * Task dates are relative to the day the data is first loaded, so the board
+ * always opens with one task in each due state (DESIGN.md §2.4):
+ *   vt-1 calm (due in 4 days), vt-2 warning (due today),
+ *   vt-3 overdue (2 days late), vt-4 done (was due 3 days ago).
  */
+
+import { addDays, todayISO } from './dates.js';
+
+const today = todayISO();
 
 /** @type {import('./model.js').Team[]} */
 export const SEED_TEAMS = [
@@ -34,8 +43,8 @@ export const SEED_TASKS = [
     type: 'feature',
     status: 'todo',
     assignee: 'member-1',
-    dueDate: '2026-10-24',
-    createdDate: '2026-10-18',
+    dueDate: addDays(today, 4),
+    createdDate: addDays(today, -2),
   },
   {
     id: 'vt-2',
@@ -45,8 +54,8 @@ export const SEED_TASKS = [
     type: 'bug',
     status: 'in-progress',
     assignee: 'member-3',
-    dueDate: '2026-10-21',
-    createdDate: '2026-10-19',
+    dueDate: today,
+    createdDate: addDays(today, -1),
   },
   {
     id: 'vt-3',
@@ -56,8 +65,8 @@ export const SEED_TASKS = [
     type: 'feature',
     status: 'review',
     assignee: 'member-2',
-    dueDate: '2026-10-22',
-    createdDate: '2026-10-15',
+    dueDate: addDays(today, -2),
+    createdDate: addDays(today, -5),
   },
   {
     id: 'vt-4',
@@ -67,7 +76,7 @@ export const SEED_TASKS = [
     type: 'feature',
     status: 'done',
     assignee: 'member-1',
-    dueDate: '2026-10-17',
-    createdDate: '2026-10-12',
+    dueDate: addDays(today, -3),
+    createdDate: addDays(today, -8),
   },
 ];

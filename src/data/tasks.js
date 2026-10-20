@@ -2,13 +2,6 @@
 
 import { nextId } from './ids.js';
 
-/** Today as a local ISO date 'YYYY-MM-DD' (not UTC, so late-night dates don't jump a day). */
-export function todayISO() {
-  const d = new Date();
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-
 /** Next readable task ID, e.g. 'vt-5' when the highest existing one is 'vt-4'. */
 export function nextTaskId(tasks) {
   return nextId(tasks, 'vt');

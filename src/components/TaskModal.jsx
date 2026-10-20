@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react';
 import { AlertTriangle, ArrowRightLeft, Trash2, X } from 'lucide-react';
+import { dueState } from '../data/due.js';
 import { STAGES, TASK_TYPES } from '../data/model.js';
 import Avatar from './Avatar.jsx';
 import Dialog from './Dialog.jsx';
+import DueChip from './DueChip.jsx';
 import FormField, { inputBorder, inputClass } from './FormField.jsx';
 import TypeBadge, { TYPE_META } from './TypeBadge.jsx';
 
@@ -40,6 +42,8 @@ export default function TaskModal({ task, members, onSave, onDelete, onHandOff, 
   const titleRef = useRef(null);
 
   const owner = members.find((m) => m.id === form.assignee);
+  // Live preview of the card's due chip as the date / status change.
+  const due = dueState({ dueDate: form.dueDate || null, status: form.status });
   const handOffTargets = members.filter((m) => m.id !== form.assignee);
 
   function update(field) {
@@ -231,6 +235,11 @@ export default function TaskModal({ task, members, onSave, onDelete, onHandOff, 
                 onChange={update('dueDate')}
                 className={`${inputClass} border-line`}
               />
+              {due && (
+                <div id="task-due-preview" className="mt-1.5">
+                  <DueChip due={due} dueDate={form.dueDate} />
+                </div>
+              )}
             </FormField>
           </div>
         </div>
