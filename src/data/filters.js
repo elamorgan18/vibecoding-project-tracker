@@ -1,5 +1,6 @@
 import { daysBetween, todayISO } from './dates.js';
 import { WARNING_WITHIN_DAYS } from './due.js';
+import { AI_TOOLS } from './context.js';
 
 /**
  * Board filters. Pure helpers, so the board, the result count and the chips
@@ -21,8 +22,20 @@ export const DUE_FILTERS = [
   { id: 'no-date', label: 'No due date' },
 ];
 
-/** @typedef {{ members: string[], due: string[] }} Filters  member ids (or UNASSIGNED) and DUE_FILTERS ids */
-export const NO_FILTERS = { members: [], due: [] };
+/** Stands in for `contextTool: null` in the AI tool filter. */
+export const NO_AI_TOOL = 'no-ai-tool';
+
+/** AI tool filter options, in menu order: every AI tool, then "No AI tool". */
+export const AI_TOOL_FILTERS = [
+  ...AI_TOOLS.map((tool) => ({ id: tool, label: tool })),
+  { id: NO_AI_TOOL, label: 'No AI tool' },
+];
+
+/**
+ * @typedef {{ members: string[], due: string[], tools: string[] }} Filters
+ *   member ids (or UNASSIGNED), DUE_FILTERS ids and AI_TOOL_FILTERS ids
+ */
+export const NO_FILTERS = { members: [], due: [], tools: [] };
 
 /**
  * Which due date option a task falls under. Every task gets at most one:
@@ -44,12 +57,14 @@ export function dueFilterId(task, today = todayISO()) {
   return null;
 }
 
-export const hasFilters = (filters) => filters.members.length > 0 || filters.due.length > 0;
+export const hasFilters = (filters) =>
+  filters.members.length > 0 || filters.due.length > 0 || filters.tools.length > 0;
 
 export function matchesFilters(task, filters, today = todayISO()) {
   const memberOk = filters.members.length === 0 || filters.members.includes(task.assignee ?? UNASSIGNED);
   const dueOk = filters.due.length === 0 || filters.due.includes(dueFilterId(task, today));
-  return memberOk && dueOk;
+  const toolOk = filters.tools.length === 0 || filters.tools.includes(task.contextTool ?? NO_AI_TOOL);
+  return memberOk && dueOk && toolOk;
 }
 
 /** `values` with `value` added, or removed if it was already there. */

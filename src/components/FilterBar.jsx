@@ -1,12 +1,12 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { ChevronDown, Filter, X } from 'lucide-react';
-import { DUE_FILTERS, NO_FILTERS, UNASSIGNED, hasFilters, toggleValue } from '../data/filters.js';
+import { AI_TOOL_FILTERS, DUE_FILTERS, NO_AI_TOOL, NO_FILTERS, UNASSIGNED, hasFilters, toggleValue } from '../data/filters.js';
 import Avatar from './Avatar.jsx';
 
 const FOCUS = 'focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-card';
 
 /**
- * Filter bar above the board: a "Team member" and a "Due date" menu, the
+ * Filter bar above the board: "Team member", "Due date" and "AI tool" menus, the
  * active filters as removable chips, "Clear filters", and a result count in
  * an aria-live region so screen readers hear it change.
  *
@@ -38,6 +38,12 @@ export default function FilterBar({ filters, onChange, members, shownCount, tota
       id,
       groupLabel: 'Due',
       label: DUE_FILTERS.find((o) => o.id === id).label,
+    })),
+    ...filters.tools.map((id) => ({
+      group: 'tools',
+      id,
+      groupLabel: 'AI tool',
+      label: AI_TOOL_FILTERS.find((o) => o.id === id)?.label ?? id,
     })),
   ];
 
@@ -88,6 +94,16 @@ export default function FilterBar({ filters, onChange, members, shownCount, tota
           selected={filters.due}
           onToggle={(id) => onChange({ ...filters, due: toggleValue(filters.due, id) })}
           renderOption={(option) => <span className="text-ink">{option.label}</span>}
+        />
+
+        <FilterMenu
+          label="AI tool"
+          options={AI_TOOL_FILTERS}
+          selected={filters.tools}
+          onToggle={(id) => onChange({ ...filters, tools: toggleValue(filters.tools, id) })}
+          renderOption={(option) => (
+            <span className={option.id === NO_AI_TOOL ? 'text-ink-soft' : 'text-ink'}>{option.label}</span>
+          )}
         />
 
         <p role="status" aria-live="polite" className="ml-auto text-sm text-ink-soft">

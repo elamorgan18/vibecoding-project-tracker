@@ -285,12 +285,12 @@ Rules:
 
 Cards are tinted by type (`feature-soft` or `bug-soft`) with a 1px border in the type colour, the 6 px theme radius, a `card`-coloured (white in light mode) icon + label badge in the top-right corner, and a soft shadow that only appears on hover. They gain a thicker coloured left border and a due-date chip only when their due date has something to say. Buttons are solid `brand` with `on-accent` text (white in light mode), `rounded`, and generous padding; secondary actions are plain text links, so there is only ever one loud button on screen, and the only red button is "Delete task" with its trash icon. The modal is centred, `max-w-lg`, on a `ink` backdrop at 40% opacity, with the Context field set in JetBrains Mono so prompts read like the code they produce, and form errors appear inline under the field in `danger-text` with an alert icon. Columns sit on `muted-bg`. Empty columns use a dashed `line` border with a short `ink-soft` line of encouragement, and status changes go through either the dropdown in the modal or drag and drop between columns (M12). While a card is dragged, the card left behind fades to 40% opacity, a lifted copy with `shadow-xl` follows the pointer, and the column under it gets a 2px `brand` ring on `brand-soft`. The same move works from the keyboard (Space, arrow keys, Space) and by press-and-hold on touch screens.
 
-**Filter bar.** The filter bar sits between the due-date legend and the board. It is a `card` panel with a `line` border. It has a "Filter tasks" label with a Lucide `Filter` icon and two menu buttons, **Team member** and **Due date**. Each button opens a `card` popover (`shadow-lg`, `z-30`) of native checkboxes tinted `accent-brand`. Team member options show the member's avatar (§2.7) and name, plus "Unassigned" with the dashed placeholder avatar. Due date options are Overdue, Due within 24h, Due in more than 2 days, Done and No due date. Rules:
+**Filter bar.** The filter bar sits between the due-date legend and the board. It is a `card` panel with a `line` border. It has a "Filter tasks" label with a Lucide `Filter` icon and three menu buttons, **Team member**, **Due date** and **AI tool**. Each button opens a `card` popover (`shadow-lg`, `z-30`) of native checkboxes tinted `accent-brand`. Team member options show the member's avatar (§2.7) and name, plus "Unassigned" with the dashed placeholder avatar. Due date options are Overdue, Due within 24h, Due in more than 2 days, Done and No due date. AI tool options are every tool in the task modal's AI tool list (Claude, ChatGPT, Cursor, Lovable, Replit, Gemini, Other), then "No AI tool" in `ink-soft` for tasks with no tool picked. Rules:
 
 - Ticks within one group are OR. Across groups they are AND.
 - Each task falls under at most one due-date option. Done wins over the date. "Due within 24h" means due today or tomorrow, because due dates have no time. A task due in exactly 2 days matches no due-date option.
 - A menu button with ticks turns `brand-soft` with a `brand` border and a solid `brand` count pill, so you can see it is active without opening it.
-- Each active filter shows below as a removable chip: a `brand-soft` pill with a `brand` border, its group in `ink-soft` ("Member:", "Due:") and a Lucide `X` icon. "Clear filters" is a plain `brand` text button, so it is not a second loud button.
+- Each active filter shows below as a removable chip: a `brand-soft` pill with a `brand` border, its group in `ink-soft` ("Member:", "Due:", "AI tool:") and a Lucide `X` icon. "Clear filters" is a plain `brand` text button, so it is not a second loud button.
 - The result count ("Showing 4 of 12 tasks") sits on the right in `ink-soft`. It is a `role="status"` / `aria-live="polite"` region, so screen readers hear it change.
 - Column count pills show matching tasks only. An empty column says "No tasks match these filters" instead of the usual encouragement.
 - Keyboard: each menu button is a disclosure (`aria-expanded`, `aria-controls`). Tab moves through the checkboxes and Space ticks them. Each group is a `fieldset` with a legend. Escape, clicking outside or tabbing away closes the menu, and Escape puts focus back on the button.
@@ -330,9 +330,9 @@ Calm, short, second person. No exclamation marks unless something is actually wr
 | Empty column placeholder | "Nothing here. Enjoy the quiet." |
 | Empty column while a card is dragged over it (M12) | "Drop it here." |
 | Empty column while filters are on | "No tasks match these filters" |
-| Filter bar: label / menu buttons | "Filter tasks" / "Team member", "Due date" |
+| Filter bar: label / menu buttons | "Filter tasks" / "Team member", "Due date", "AI tool" |
 | Filter bar: result count (aria-live) | "Showing all {n} tasks" / "Showing {shown} of {n} tasks" |
-| Filter chip / its accessible name | "Member: {name}" or "Due: {option}" / "Remove filter Member: {name}" |
+| Filter chip / its accessible name | "Member: {name}", "Due: {option}" or "AI tool: {tool}" / "Remove filter Member: {name}" |
 | Filter bar: reset | "Clear filters" |
 | Drag and drop screen-reader announcements (M12) | "Picked up Task {id}, {title}, in {column}." / "Over {column}." / "Task {id}, {title}, moved to {column}." / "Move cancelled. Task {id}, {title}, stays in {column}." |
 | View switch (M12) | "Board" / "Insights" |

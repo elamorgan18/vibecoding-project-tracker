@@ -429,3 +429,15 @@ Remove the "Load demo data" and "Reset" buttons and their confirm dialogs. Keep 
 ````
 
 **Summary:** Removed the Demo data panel: deleted `src/components/DemoDataPanel.jsx` and removed its header button, `handleLoadDemo` / `handleReset` and `setProjects` from `App.jsx`. `seed.js` now only exports the `SEED_*` defaults, which `useLocalStorage` uses when a key is empty. Saved data is never replaced. Updated `DESIGN.md` §4/§5 and the factual sections of `docs/decisions/M12-secret-sauce.md`. Tested in headless Edge (7/7 checks passed): empty storage loads 30 tasks and 6 members, and saved data (5 tasks, an old 1-task list, an empty list) survives a reload unchanged. `npm run build` passes.
+
+### 2026-10-20 15:33 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Add an "AI tool" filter to the existing filter bar: multi-select of every AI tool (Claude, ChatGPT, Cursor, Lovable, Replit, Gemini, Other) plus "No AI tool". It works the same way as the other filters: OR within the group, AND with the team member and due date filters, shown as removable chips, included in "Clear filters" and the "Showing X of Y tasks" count. Labelled, keyboard accessible, works in dark mode. Update DESIGN.md.
+````
+
+**Summary:** Added an "AI tool" menu to the filter bar (every tool from `AI_TOOLS` plus "No AI tool"), with "AI tool:" chips, Clear filters and the result count covering it. `src/data/filters.js` gains `AI_TOOL_FILTERS`, `NO_AI_TOOL` and a `tools` group in `NO_FILTERS` / `hasFilters` / `matchesFilters`; `src/components/FilterBar.jsx` renders the menu and chips with the existing accessible `FilterMenu`. Updated `DESIGN.md` §4 filter bar and the microcopy table. Logic checked against the 30 seed tasks (each matches exactly one AI tool option, OR/AND correct). `npm run build` passes.
