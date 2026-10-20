@@ -39,6 +39,14 @@
  * @property {string|null} assignee           Member.id
  * @property {string|null} dueDate            ISO 'YYYY-MM-DD'
  * @property {string} createdDate             ISO 'YYYY-MM-DD'
+ *
+ * AI context (M9). Older tasks may not have these; read them through
+ * `contextValues()` in context.js, which fills in defaults.
+ * @property {string} [context]                Markdown briefing, stored exactly as typed/pasted
+ * @property {string|null} [contextTool]      'Claude' | 'ChatGPT' | 'Cursor' | 'Lovable' | 'Replit' | 'Gemini' | 'Other'
+ * @property {'worked'|'partial'|'failed'|'not-tried'} [aiOutcome]
+ * @property {string} [aiProblems]             problems hit with the AI tool
+ * @property {string|null} [contextUpdatedAt]  ISO timestamp, set when any context field changes
  */
 
 // The four columns of the board, in render order.

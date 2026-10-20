@@ -43,22 +43,25 @@ export default function Dialog({ labelledBy, onClose, initialFocusRef, className
     };
   }, []);
 
+  // Backdrop click closes. The inner wrapper is min-h-full so a dialog taller
+  // than the viewport scrolls from its top instead of being cut off.
+  const closeOnBackdrop = (e) => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/40 p-4 sm:items-center"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={labelledBy}
-        tabIndex={-1}
-        className={`w-full ${className} rounded border border-line bg-card shadow-xl focus:outline-none`}
-      >
-        {children}
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-ink/40" onMouseDown={closeOnBackdrop}>
+      <div className="flex min-h-full items-start justify-center p-4 sm:items-center sm:py-8" onMouseDown={closeOnBackdrop}>
+        <div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={labelledBy}
+          tabIndex={-1}
+          className={`w-full ${className} rounded border border-line bg-card shadow-xl focus:outline-none`}
+        >
+          {children}
+        </div>
       </div>
     </div>
   );

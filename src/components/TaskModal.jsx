@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react';
 import { AlertTriangle, ArrowRightLeft, Trash2, X } from 'lucide-react';
+import { contextChanged, contextValues, NEW_TASK_CONTEXT } from '../data/context.js';
 import { dueState } from '../data/due.js';
 import { STAGES, TASK_TYPES } from '../data/model.js';
 import Avatar from './Avatar.jsx';
+import ContextSection from './ContextSection.jsx';
 import Dialog from './Dialog.jsx';
 import DueChip from './DueChip.jsx';
 import FormField, { inputBorder, inputClass } from './FormField.jsx';
@@ -22,8 +24,10 @@ const EMPTY_FORM = {
  * In edit mode the assignee is shown as the task's owner with a
  * "Hand off to…" dropdown that reassigns immediately via `onHandOff`.
  * Delete asks for confirmation inline before calling `onDelete`.
+ * `saveError` (set by the parent when storage is full) is shown above the
+ * footer; the form keeps everything typed so nothing is lost.
  */
-export default function TaskModal({ task, members, onSave, onDelete, onHandOff, onClose }) {
+export default function TaskModal({ task, members, onSave, onDelete, onHandOff, onClose, saveError }) {
   const isEdit = task != null;
   const [form, setForm] = useState(() =>
     isEdit
@@ -34,9 +38,12 @@ export default function TaskModal({ task, members, onSave, onDelete, onHandOff, 
           status: task.status,
           assignee: task.assignee ?? '',
           dueDate: task.dueDate ?? '',
+          ...contextValues(task),
         }
-      : EMPTY_FORM,
+      : { ...EMPTY_FORM, ...NEW_TASK_CONTEXT },
   );
+  const contextBaseline = isEdit ? contextValues(task) : NEW_TASK_CONTEXT;
+  const contextDirty = contextChanged(contextBaseline, contextValues(form));
   const [titleError, setTitleError] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const titleRef = useRef(null);
@@ -68,6 +75,8 @@ export default function TaskModal({ task, members, onSave, onDelete, onHandOff, 
       titleRef.current?.focus();
       return;
     }
+    // Context fields are passed through untouched (no trimming), so pasted
+    // text keeps its exact line breaks, indentation and Markdown.
     onSave({
       ...form,
       title,
@@ -78,7 +87,7 @@ export default function TaskModal({ task, members, onSave, onDelete, onHandOff, 
   }
 
   return (
-    <Dialog labelledBy="task-modal-title" onClose={onClose} initialFocusRef={titleRef}>
+    <Dialog labelledBy="task-modal-title" onClose={onClose} initialFocusRef={titleRef} className="max-w-3xl">
       <header
         className={`flex items-start justify-between rounded-t border-b border-line px-5 py-4 ${TYPE_META[form.type].tint}`}
       >
@@ -242,7 +251,25 @@ export default function TaskModal({ task, members, onSave, onDelete, onHandOff, 
               )}
             </FormField>
           </div>
+
+          <ContextSection
+            values={contextValues(form)}
+            onChange={(field, value) => setForm((f) => ({ ...f, [field]: value }))}
+            updatedAt={isEdit ? task.contextUpdatedAt : null}
+            dirty={contextDirty}
+          />
         </div>
+
+        {saveError && (
+          <div role="alert" className="mx-5 mb-4 flex items-start gap-2 rounded border border-danger bg-danger-soft p-3 text-sm text-ink">
+            <AlertTriangle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-danger" />
+            <p>
+              <span className="font-semibold text-danger-text">Couldn't save. </span>
+              {saveError} Your text is still here: use <strong>Copy</strong> on the Context box to keep a copy, then
+              free up space (for example, delete old tasks) and try again.
+            </p>
+          </div>
+        )}
 
         {confirmingDelete ? (
           <div className="flex flex-col gap-3 border-t border-line bg-danger-soft px-5 py-4 sm:flex-row sm:items-center sm:justify-between">

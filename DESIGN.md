@@ -190,6 +190,11 @@ Calm, short, second person. No exclamation marks unless something is actually wr
 | Driving strip (M7): heading / empty member | "Who's driving what" / "Nothing in progress" |
 | Team panel: add / remove toasts (success) | "Added {name} to the team." / "Removed {name} from the team." |
 | Team panel: remove confirm (danger) | "Remove {name} from the team? Their {n} tasks will become unassigned." |
+| Context box (M9): copy button / confirmation | "Copy" / "Copied!" |
+| Context box: timestamp | "Last updated {3 hours ago}" / "Not updated yet" (+ " · unsaved changes") |
+| Context box: copy failed (danger) | "Couldn't copy. Select the text and copy it manually." |
+| Save failed, storage full (danger) | "Couldn't save. Your browser's storage for this site is full. Your text is still here…" |
+| Storage-full page banner (danger) | "Your latest changes aren't saved. …They'll be lost if you close or reload this page." |
 
 ## 6. Logo / wordmark
 

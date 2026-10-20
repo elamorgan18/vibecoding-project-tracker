@@ -14,6 +14,34 @@
 import { addDays, todayISO } from './dates.js';
 
 const today = todayISO();
+const hoursAgo = (h) => new Date(Date.now() - h * 60 * 60 * 1000).toISOString();
+
+// Example AI context so the M9 Context section isn't empty on first load.
+const VT2_CONTEXT = `## Background
+Users in UTC+1 who create an event after 11pm see it on the **next day**
+in the event list. The picker returns a local \`Date\`; we store it with
+\`toISOString()\`, which converts to UTC.
+
+## Constraints
+- Keep storing dates as \`YYYY-MM-DD\` strings (other code relies on it).
+- No new date library: the bundle budget is tight.
+
+## Tried so far
+1. Asked Claude to "fix the timezone bug". It suggested \`moment-timezone\`,
+   which breaks the no-new-library rule.
+2. Second attempt: format the local date by hand:
+
+   \`\`\`js
+   const pad = (n) => String(n).padStart(2, '0');
+   const iso = \`\${d.getFullYear()}-\${pad(d.getMonth() + 1)}-\${pad(d.getDate())}\`;
+   \`\`\`
+
+   Works for creating events, but editing still shifts the date.
+
+## Pick up
+- [ ] Find where the edit form parses the stored string back into a \`Date\`
+- [ ] Add a test for 23:30 local time
+`;
 
 /** @type {import('./model.js').Team[]} */
 export const SEED_TEAMS = [
@@ -56,6 +84,13 @@ export const SEED_TASKS = [
     assignee: 'member-3',
     dueDate: today,
     createdDate: addDays(today, -1),
+    context: VT2_CONTEXT,
+    contextTool: 'Claude',
+    aiOutcome: 'partial',
+    aiProblems:
+      'First answer added a new dependency (moment-timezone) despite the "no new library" constraint. ' +
+      'The second answer only fixed the create path; it missed that the edit form re-parses the date with new Date(string), which is read as UTC.',
+    contextUpdatedAt: hoursAgo(3),
   },
   {
     id: 'vt-3',
@@ -67,6 +102,19 @@ export const SEED_TASKS = [
     assignee: 'member-2',
     dueDate: addDays(today, -2),
     createdDate: addDays(today, -5),
+    context: `## Background
+RSVP confirmations should go out as plain text (no HTML templates yet).
+
+## Tried so far
+ChatGPT generated the email builder and a unit test in one go.
+
+## Pick up
+Waiting on review: check the subject line wording.
+`,
+    contextTool: 'ChatGPT',
+    aiOutcome: 'worked',
+    aiProblems: '',
+    contextUpdatedAt: hoursAgo(26),
   },
   {
     id: 'vt-4',

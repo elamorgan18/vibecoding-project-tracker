@@ -217,3 +217,21 @@ M8: Show due-date urgency automatically using the card's LEFT BORDER and a small
 ````
 
 **Summary:** Added `src/data/due.js` (`dueState`; 0–2 days = warning), `src/data/dates.js`, `DueChip.jsx` and `DueLegend.jsx`. Cards get a due left border and chip (`TaskCard.jsx`), the modal previews the chip (`TaskModal.jsx`), and `App.jsx` shows the legend. Seed dates are relative to today so all four states show (`seed.js`). Updated `DESIGN.md` §2.4/§2.6, tested in jsdom (97/97 passed), and filled in `docs/decisions/M8-due-tint.md`.
+
+## M9 – context
+
+### 2026-10-20 13:24 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+M9: Add a "Context" section to the task modal: a Markdown textarea pre-filled for new tasks with a template (Background / Constraints / Tried so far / Pick up). Below it, an "AI tool" dropdown (Claude, ChatGPT, Cursor, Lovable, Replit, Gemini, Other) saved as contextTool. Also add an "Outcome" dropdown (Worked / Partial / Failed / Not tried yet) and an "AI problems" textarea for issues hit with the AI tool. Save a contextUpdatedAt timestamp whenever context is edited and show "last updated X ago" near the field. Use the monospace font for the context textarea. Stretch: a live Markdown preview pane.
+
+Context box requirements: no character or word limit (no maxLength). Pasting large blocks of text must keep line breaks, indentation and Markdown exactly as pasted. The textarea should be resizable and grow with its content, with scrolling for very long text. Add a small "Copy" button on the context box that copies exactly what's in the box to the clipboard, with a "Copied!" confirmation. If saving fails because browser storage is full, show a clear error message instead of silently losing the text.
+
+Fill in at least one mock task's context so it's visible. Fill in the factual sections of docs/decisions/M9-task-context.md.
+````
+
+**Summary:** Added `ContextSection.jsx`, `MarkdownPreview.jsx` (`react-markdown` + `remark-gfm`), `src/data/context.js` and `src/utils/clipboard.js`. Added `timeAgo` to `dates.js`, and made `useLocalStorage.js` report write errors. Updated `TaskModal.jsx`, `App.jsx` (`contextUpdatedAt`, synchronous save with storage-full alert, page banner), `Dialog.jsx`, `FormField.jsx`, `model.js`, `seed.js` (context for vt-2 / vt-3) and the `DESIGN.md` microcopy. Renamed `docs/decisions/M9-context.md` to `M9-task-context.md` and filled it in. Tested in jsdom (133/133 passed).
