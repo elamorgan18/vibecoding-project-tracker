@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AlertTriangle, Plus, Users } from 'lucide-react';
 import { buildBriefing } from './data/briefing.js';
+import { hasFilters, matchesFilters, NO_FILTERS } from './data/filters.js';
 import { contextChanged, contextValues, NEW_TASK_CONTEXT } from './data/context.js';
 import { STORAGE_KEYS } from './data/model.js';
 import { SEED_TEAMS, SEED_PROJECTS, SEED_TASKS, SEED_ANCHORS } from './data/seed.js';
@@ -15,6 +16,7 @@ import AnchorBoard from './components/AnchorBoard.jsx';
 import Board from './components/Board.jsx';
 import TeamMembersStrip from './components/TeamMembersStrip.jsx';
 import DueLegend from './components/DueLegend.jsx';
+import FilterBar from './components/FilterBar.jsx';
 import TaskModal from './components/TaskModal.jsx';
 import TeamPanel from './components/TeamPanel.jsx';
 import ThemeToggle from './components/ThemeToggle.jsx';
@@ -29,7 +31,8 @@ import Toast from './components/Toast.jsx';
  *   src/hooks/useLocalStorage.js
  *   src/theme/tokens.js         light + dark colour tokens (read by tailwind.config.js)
  *   src/hooks/useTheme.js       light / dark mode (ThemeToggle in the header)
- *   src/components/             AnchorBoard → AnchorCard, TeamMembersStrip, Board → Column → TaskCard,
+ *   src/data/filters.js         board filter matching (FilterBar)
+ *   src/components/             AnchorBoard → AnchorCard, TeamMembersStrip, FilterBar, Board → Column → TaskCard,
  *                               TaskModal, TeamPanel, Toast (+ shared Dialog,
  *                               FormField, Avatar, TypeBadge)
  *
@@ -54,11 +57,14 @@ export default function App() {
   const [saveError, setSaveError] = useState(null);
   const [teamOpen, setTeamOpen] = useState(false);
   const [toast, setToast] = useState(null);
+  // Board filters (FilterBar). Kept for this visit only, not saved.
+  const [filters, setFilters] = useState(NO_FILTERS);
 
   // One team, one project for now. A project switcher can replace this later.
   const project = projects[0];
   const team = teams.find((t) => t.id === project.teamId);
   const projectTasks = tasks.filter((task) => task.projectId === project.id);
+  const visibleTasks = projectTasks.filter((task) => matchesFilters(task, filters));
 
   function showToast(message, tone = 'success') {
     setToast({ id: Date.now(), message, tone });
@@ -130,6 +136,7 @@ export default function App() {
     const member = team.members.find((m) => m.id === memberId);
     setTeams((all) => removeMember(all, team.id, memberId));
     setTasks((all) => unassignMember(all, memberId));
+    setFilters((f) => ({ ...f, members: f.members.filter((id) => id !== memberId) }));
     showToast(`Removed ${member.name} from the team.`);
   }
 
@@ -188,8 +195,17 @@ export default function App() {
 
       <DueLegend />
 
+      <FilterBar
+        filters={filters}
+        onChange={setFilters}
+        members={team.members}
+        shownCount={visibleTasks.length}
+        totalCount={projectTasks.length}
+      />
+
       <Board
-        tasks={projectTasks}
+        tasks={visibleTasks}
+        isFiltered={hasFilters(filters)}
         members={team.members}
         onOpenTask={openModal}
         onCopyContext={handleCopyContext}

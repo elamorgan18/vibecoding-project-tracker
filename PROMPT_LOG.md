@@ -372,3 +372,15 @@ Add a dark mode toggle button in the header (Tailwind `darkMode: 'class'`). Defa
 ````
 
 **Summary:** Added dark mode. Light and dark values for every colour token are in the new `src/theme/tokens.js`, and `tailwind.config.js` (`darkMode: 'class'`) turns them into CSS variables, so existing classes switch theme without `dark:` variants. Added two tokens, `on-accent` and `scrim`. The new `useTheme.js` and `ThemeToggle.jsx` handle the toggle: system default, a choice saved under `vibetracker.theme`, moon/sun icon, label, `aria-pressed` and a focus ring. An `index.html` script sets the theme before the first paint. Also changed `App.jsx`, `index.css`, `Dialog.jsx` and `model.js`, replaced `text-white` with `text-on-accent`, and added DESIGN.md §2.8 with dark tokens, avatars, a contrast table and failures. No text pair fails in either theme. Only the decorative `line` border fails (1.41:1 dark, 1.23:1 light). Tested in headless Edge with axe-core (21/21 checks passed) and re-ran the M12 drag-and-drop tests (36/36 passed).
+
+### 2026-10-20 15:00 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Add a filter bar above the board. Filters: Team member (multi-select, with avatar + name, plus "Unassigned") and Due date (Overdue / Due within 24h / Due in more than 2 days / Done / No due date). Tasks only show if they match all active filters; filters within one group are OR. Show active filters as removable chips, a "Clear filters" button, and a result count (e.g. "Showing 4 of 12 tasks") announced to screen readers via aria-live. Empty columns show "No tasks match these filters". Labelled controls, keyboard accessible, visible focus. Drag-and-drop and Copy Context still work while filtered. Update DESIGN.md.
+````
+
+**Summary:** Added a filter bar above the board. It has Team member and Due date disclosure menus of checkboxes (OR within a group, AND across groups), removable chips, "Clear filters", and an aria-live result count. Empty filtered columns say "No tasks match these filters". New files: `src/data/filters.js` (matching logic) and `src/components/FilterBar.jsx`. Wired into `App.jsx`, `Board.jsx` and `Column.jsx`. Updated `DESIGN.md` §4, §5 and §7. "Due within 24h" means due today or tomorrow, so a task due in exactly 2 days matches no due-date option. Tested in headless Edge: 32/32 checks passed, including keyboard and mouse drag while filtered, Copy Context, focus handling, and axe (light and dark). `npm run build` passes.

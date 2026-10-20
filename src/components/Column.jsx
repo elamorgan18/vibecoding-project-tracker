@@ -8,8 +8,11 @@ import TaskCard from './TaskCard.jsx';
  *
  * It is also a drop target (M12). While a card is dragged over it, it gets a
  * brand ring and the brand-soft background.
+ *
+ * With filters on (`isFiltered`), `tasks` and the count pill are the matching
+ * tasks only, and an empty column says so instead of "Enjoy the quiet".
  */
-export default function Column({ stage, tasks, membersById, onOpenTask, onCopyContext }) {
+export default function Column({ stage, tasks, isFiltered, membersById, onOpenTask, onCopyContext }) {
   const isDone = stage.id === 'done';
   const { setNodeRef, isOver } = useDroppable({ id: stage.id });
 
@@ -41,7 +44,7 @@ export default function Column({ stage, tasks, membersById, onOpenTask, onCopyCo
             isOver ? 'border-brand' : 'border-line'
           }`}
         >
-          {isOver ? 'Drop it here.' : 'Nothing here. Enjoy the quiet.'}
+          {isOver ? 'Drop it here.' : isFiltered ? 'No tasks match these filters' : 'Nothing here. Enjoy the quiet.'}
         </p>
       ) : (
         <ul className="flex flex-col gap-2">

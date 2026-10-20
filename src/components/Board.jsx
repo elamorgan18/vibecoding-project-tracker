@@ -94,8 +94,11 @@ const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)')
  *   - Touch: press and hold 250ms, so a normal swipe still scrolls the page.
  *   - Keyboard: Space picks up / drops, arrows change column, Escape cancels.
  * The dragged card is drawn in a DragOverlay so it floats above everything.
+ *
+ * `tasks` is already filtered (FilterBar). Columns stay drop targets while
+ * filtered; a card moved out of the filter's scope drops out of view.
  */
-export default function Board({ tasks, members, onOpenTask, onCopyContext, onMoveTask }) {
+export default function Board({ tasks, isFiltered, members, onOpenTask, onCopyContext, onMoveTask }) {
   const membersById = Object.fromEntries(members.map((m) => [m.id, m]));
   const [activeTask, setActiveTask] = useState(null);
   // Swallow the click the browser may fire on the card at the end of a drag.
@@ -146,6 +149,7 @@ export default function Board({ tasks, members, onOpenTask, onCopyContext, onMov
             key={stage.id}
             stage={stage}
             tasks={tasks.filter((task) => task.status === stage.id)}
+            isFiltered={isFiltered}
             membersById={membersById}
             onOpenTask={handleOpen}
             onCopyContext={onCopyContext}
