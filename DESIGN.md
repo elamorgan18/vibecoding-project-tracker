@@ -307,6 +307,18 @@ Cards are tinted by type (`feature-soft` or `bug-soft`) with a 1px border in the
 - A collapsed column is still a drop target. Dropping a card into it (mouse, touch or keyboard) updates the count, and the `brand` ring shows around the header.
 - Each column's state is saved in localStorage under `vibetracker.collapsedColumns` (`{ [stageId]: true }`), so it survives a reload.
 
+**Insights view (M12 secret sauce).** A **Board / Insights** switch in the header (two toggle buttons in a `role="group"`, the current one `brand-soft` with a `brand` Lucide icon and `aria-pressed="true"`) swaps the board for an Insights page. Everything on it is worked out live from this team's own logged tasks (`src/data/insights.js`), and the intro says so: "Based on this team's own logged tasks". Charts use Recharts and are loaded only when Insights is first opened. Layout: Progress on the left (2/5 width on wide screens), AI tool performance and the best/lowest cards on the right (3/5), stacked on narrower screens. Each chart sits in a `card` panel with a `line` border.
+
+- **Progress.** A "Team member" select (Whole team, each member, Unassigned), a large "{n}% complete" figure with a thin `success` meter, and a bar chart of tasks per status. Bars are `brand`, except Done in `success` (the Done column's accent), with the count above each bar.
+- **AI tool performance.** One horizontal stacked bar per AI tool that has tasks, in `AI_TOOLS` order: Worked, Partial, Failed. The success rate is on the right-hand axis. Success rate = Worked ÷ (Worked + Partial + Failed); "Not tried yet" doesn't count and appears only in the table.
+- **Outcome colours are never the only cue.** Worked is solid `success`, Partial is `due-warning` with diagonal stripes, and Failed is `danger` with dots. Stripes and dots are drawn in the `card` colour, so they show in both themes. A legend above the chart shows each pattern swatch next to its label, and the same swatches appear in the tooltip and the table headers.
+- **Best / lowest success rate.** Two cards with a Lucide `TrendingUp` (`success`) or `TrendingDown` (`danger`) icon, the tool name in large type and "{rate}% success · worked on {n} of {m} tasks". Only tools with at least 3 tasks marked Worked, Partial or Failed are ranked. "Other" is a mix of tools, so it is never ranked. When no tool qualifies (or only one, for the lowest card), the card says "Not enough data yet" and why. A caption lists the tools that weren't ranked.
+- **Text summary and table.** Every chart has a written summary under its title with all the numbers. That summary is also the chart's accessible description: the chart is `role="img"` with an `aria-label` and `aria-describedby` the summary. The Progress summary is `aria-live="polite"`, so changing the member is announced. A small "View as table" button (Lucide `Table`, becoming "View as chart" with `BarChart3`) swaps the chart for a table with a hidden caption, column and row headers.
+- **Dark mode.** SVG fills can't read Tailwind classes, so the charts take their colours straight from `src/theme/tokens.js` for the current theme (axis text `ink` / `ink-soft`, grid `line`, hover `muted-bg`). The tooltip is a normal `card` panel.
+- **Motion.** Recharts' bar grow animation is off when the user asks for reduced motion.
+
+**Suggested AI tool (task modal).** Above the AI tool field there is a `brand-soft` note with a `brand/40` border and a Lucide `Lightbulb` icon: "**Suggested AI tool for bugs: Claude.** Claude worked on 4 of 5 bug tasks (80%). Based on this team's history, not a general ranking." It follows the Type toggle (feature or bug). It picks the tool with the best success rate on past tasks of that type, ranked by the same rules as the best/lowest cards. The task being edited doesn't count towards itself. A small secondary "Use Claude" button fills in the AI tool select and moves focus to it, then it shows "✓ Selected" in `success-text`. With too little history it says "No suggested AI tool for features yet." and explains the 3-task minimum. The AI tool select is `aria-describedby` the note.
+
 ## 5. Voice / microcopy
 
 Calm, short, second person. No exclamation marks unless something is actually wrong.
@@ -323,6 +335,12 @@ Calm, short, second person. No exclamation marks unless something is actually wr
 | Filter chip / its accessible name | "Member: {name}" or "Due: {option}" / "Remove filter Member: {name}" |
 | Filter bar: reset | "Clear filters" |
 | Drag and drop screen-reader announcements (M12) | "Picked up Task {id}, {title}, in {column}." / "Over {column}." / "Task {id}, {title}, moved to {column}." / "Move cancelled. Task {id}, {title}, stays in {column}." |
+| View switch (M12) | "Board" / "Insights" |
+| Insights intro | "Based on this team's own logged tasks: {n} tasks in {project}. Updates as you edit tasks." |
+| Insights: progress summary | "{Whole team / name}: {done} of {n} tasks done ({pct}% complete). To Do: {n}, In Progress: {n}, Review: {n}, Done: {n}." |
+| Insights: chart / table toggle | "View as table" / "View as chart" |
+| Insights: best / lowest cards | "Best success rate" / "Lowest success rate", "{rate}% success · worked on {n} of {m} tasks", or "Not enough data yet" |
+| Suggested AI tool (task modal) | "Suggested AI tool for {bugs}: {tool}. {tool} worked on {n} of {m} {bug} tasks ({pct}%). Based on this team's history, not a general ranking." / "Use {tool}" / "Selected" |
 | Toast after "Copy Context" (M10, success) | "Copied to clipboard!" (copy failed, danger: "Couldn't copy. Your browser blocked the clipboard.") |
 | Confirm-delete message (danger) | "Delete this task and its prompt history? This can't be undone." |
 | Handoff toast (M7 `task-owner`, success) | "Handed to {name}. It's on their board now." |
@@ -349,7 +367,7 @@ Calm, short, second person. No exclamation marks unless something is actually wr
 
 - Multiple themes. One brand, applied consistently.
 - Saved or shareable filters (filters reset on reload), and filtering by type or text search.
-- Animations beyond a 200 ms fade on toast notifications and the M12 drag and drop motion (the lifted card's tilt and the drop animation), which are both turned off when the user asks for reduced motion.
+- Animations beyond a 200 ms fade on toast notifications, the M12 drag and drop motion (the lifted card's tilt and the drop animation) and the Insights bars growing in. All are turned off when the user asks for reduced motion.
 - A custom icon set. Use [Lucide icons](https://lucide.dev) if needed.
 
 ---

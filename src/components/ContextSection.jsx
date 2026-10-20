@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Check, Copy, Eye, EyeOff, FileText } from 'lucide-react';
+import { Check, Copy, Eye, EyeOff, FileText, Lightbulb } from 'lucide-react';
 import { AI_OUTCOMES, AI_TOOLS, CONTEXT_TEMPLATE } from '../data/context.js';
+import { MIN_TASKS_FOR_RANKING } from '../data/insights.js';
 import { timeAgo } from '../data/dates.js';
 import { copyText } from '../utils/clipboard.js';
 import FormField, { inputClass } from './FormField.jsx';
@@ -29,11 +30,16 @@ function useNow(ms) {
  *
  * `values` holds context / contextTool / aiOutcome / aiProblems;
  * `onChange(field, value)` updates one of them.
+ *
+ * `suggestion` (M12, from suggestTool() in insights.js) is the AI tool with
+ * the best success rate on this team's past tasks of `taskType`, or null
+ * when there isn't enough history yet.
  */
-export default function ContextSection({ values, onChange, updatedAt, dirty }) {
+export default function ContextSection({ values, onChange, updatedAt, dirty, suggestion, taskType }) {
   const [showPreview, setShowPreview] = useState(false);
   const [copyState, setCopyState] = useState(null); // null | 'copied' | 'failed'
   const textareaRef = useRef(null);
+  const toolRef = useRef(null);
   const now = useNow(TICK_MS);
 
   // Grow the box to fit its content (up to the CSS max height, then it
@@ -144,10 +150,22 @@ export default function ContextSection({ values, onChange, updatedAt, dirty }) {
         </p>
       </div>
 
+      <ToolSuggestion
+        suggestion={suggestion}
+        taskType={taskType}
+        selectedTool={values.contextTool}
+        onUse={(tool) => {
+          onChange('contextTool', tool);
+          toolRef.current?.focus();
+        }}
+      />
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <FormField id="task-context-tool" label="AI tool">
           <select
+            ref={toolRef}
             id="task-context-tool"
+            aria-describedby="task-tool-suggestion"
             value={values.contextTool ?? ''}
             onChange={(e) => onChange('contextTool', e.target.value || null)}
             className={`${inputClass} border-line`}
@@ -188,5 +206,44 @@ export default function ContextSection({ values, onChange, updatedAt, dirty }) {
         />
       </FormField>
     </section>
+  );
+}
+
+/**
+ * "Suggested AI tool" note above the AI tool field (M12). Says plainly that
+ * it comes from this team's history, and offers a one-click "Use" button.
+ */
+function ToolSuggestion({ suggestion, taskType, selectedTool, onUse }) {
+  return (
+    <div id="task-tool-suggestion" className="flex flex-col gap-2 rounded border border-brand/40 bg-brand-soft p-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex items-start gap-2">
+        <Lightbulb aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+        {suggestion ? (
+          <p className="text-sm text-ink">
+            <span className="font-semibold">Suggested AI tool for {taskType}s: {suggestion.tool}.</span>{' '}
+            {suggestion.reason}{' '}
+            <span className="text-ink-soft">Based on this team’s history, not a general ranking.</span>
+          </p>
+        ) : (
+          <p className="text-sm text-ink">
+            <span className="font-semibold">No suggested AI tool for {taskType}s yet.</span>{' '}
+            <span className="text-ink-soft">
+              A tool needs at least {MIN_TASKS_FOR_RANKING} {taskType} tasks with an outcome in this team’s history.
+            </span>
+          </p>
+        )}
+      </div>
+      {suggestion &&
+        (selectedTool === suggestion.tool ? (
+          <p className="flex shrink-0 items-center gap-1 text-xs font-medium text-success-text">
+            <Check aria-hidden="true" className="h-3.5 w-3.5" />
+            Selected
+          </p>
+        ) : (
+          <button type="button" onClick={() => onUse(suggestion.tool)} className={`${smallButton} shrink-0 self-start`}>
+            Use {suggestion.tool}
+          </button>
+        ))}
+    </div>
   );
 }

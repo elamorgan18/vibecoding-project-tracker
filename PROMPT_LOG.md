@@ -396,3 +396,36 @@ Make each board column collapsible with a simple arrow button in the column head
 ````
 
 **Summary:** Added a collapse button to each column header (`ChevronDown` when expanded, `ChevronUp` when collapsed). It has a "Collapse/Expand <column>" label, `aria-expanded`/`aria-controls` and the `brand` focus ring. A collapsed column keeps its header, count and width, and is still a drop target. State is saved under the new `STORAGE_KEYS.collapsedColumns` (`vibetracker.collapsedColumns`) via `useLocalStorage`. Files: `Column.jsx`, `Board.jsx`, `model.js`, DESIGN.md §4. Tested in headless Edge: labels, icons, hiding, width, persistence across reload, Enter/Space, focus ring, keyboard drop into a collapsed column, and axe in light and dark all passed. `npm run build` passes.
+
+### 2026-10-20 15:24 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+M12 secret sauce: add an "Insights" view (toggle from the header) that analyses the team's own logged task data. Use Recharts.
+1. Progress: tasks per status (To Do / In Progress / Review / Done) and % complete, filterable by team member.
+2. AI tool performance: for each AI tool (contextTool), a stacked bar of outcomes (Worked / Partial / Failed), with success rate %.
+3. Best/worst AI: highlight the tool with the highest and lowest success rate, only counting tools with at least 3 tasks (otherwise say "Not enough data yet").
+4. Suggested AI: on the task modal, suggest a tool based on the best success rate for that task type (feature or bug), with the reason shown, e.g. "Claude worked on 4 of 5 bug tasks". Make it clear it's based on this team's history.
+Accessibility: every chart has a text summary and a "View as table" option, outcome colours are paired with labels/patterns, and it works in dark mode.
+
+Demo data: expand the seed data so the app looks full and realistic: about 6 team members (each with an avatar colour), and 25–30 tasks spread across all four columns, with a mix of feature/bug, all due-date states (overdue, due soon, calm, done), every AI tool, and varied outcomes (Worked/Partial/Failed/Not tried), with realistic vibecoding titles, descriptions, filled-in Context, and AI problems on some. Since my browser already has saved data, add a "Load demo data" button (with a confirm dialog warning it replaces current data) and a "Reset" option, so the new seed loads without me clearing storage manually.
+
+Fill in the factual sections of docs/decisions/M12-secret-sauce.md.
+````
+
+**Summary:** Added an Insights view (header Board / Insights switch, lazy-loaded Recharts 2.15.4) with Progress per status filterable by member, AI tool outcome stacked bars with success rates and patterned fills, best/lowest tool cards (3-task minimum, otherwise "Not enough data yet"), a text summary and "View as table" for every chart, and theme-aware colours. Added a team-history suggested AI tool to the task modal. Expanded the seed to 6 members and 30 tasks. Added a Demo data panel with confirmed "Load demo data" and "Reset". New files: `src/data/insights.js`, `src/components/insights/*`, `ViewSwitch.jsx`, `DemoDataPanel.jsx`. Changed: `seed.js`, `App.jsx`, `TaskModal.jsx`, `ContextSection.jsx`, `package.json`, `DESIGN.md` §4/§5/§7. Filled in the factual sections of `docs/decisions/M12-secret-sauce.md` (Insights added alongside the existing drag-and-drop notes). Tested in headless Edge: 43 of 45 checks passed. Both failures were test mistakes (an old member count, and the existing `favicon.ico` 404). axe found no violations in light or dark mode. `npm run build` passes.
+
+### 2026-10-20 15:40 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Remove the "Load demo data" and "Reset" buttons and their confirm dialogs. Keep the full demo data as the default seed: it loads automatically whenever localStorage is empty (e.g. a first-time visitor or the assessor opening the deployed link), and after that the user's own changes are saved as normal. Don't wipe or replace data that's already saved. Update the docs/decisions/M12-secret-sauce.md factual sections.
+````
+
+**Summary:** Removed the Demo data panel: deleted `src/components/DemoDataPanel.jsx` and removed its header button, `handleLoadDemo` / `handleReset` and `setProjects` from `App.jsx`. `seed.js` now only exports the `SEED_*` defaults, which `useLocalStorage` uses when a key is empty. Saved data is never replaced. Updated `DESIGN.md` §4/§5 and the factual sections of `docs/decisions/M12-secret-sauce.md`. Tested in headless Edge (7/7 checks passed): empty storage loads 30 tasks and 6 members, and saved data (5 tasks, an old 1-task list, an empty list) survives a reload unchanged. `npm run build` passes.

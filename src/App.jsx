@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { AlertTriangle, Plus, Users } from 'lucide-react';
 import { buildBriefing } from './data/briefing.js';
 import { hasFilters, matchesFilters, NO_FILTERS } from './data/filters.js';
@@ -20,21 +20,27 @@ import FilterBar from './components/FilterBar.jsx';
 import TaskModal from './components/TaskModal.jsx';
 import TeamPanel from './components/TeamPanel.jsx';
 import ThemeToggle from './components/ThemeToggle.jsx';
+import ViewSwitch from './components/ViewSwitch.jsx';
 import Toast from './components/Toast.jsx';
+
+// Loaded on first open, so Recharts isn't in the board's bundle.
+const Insights = lazy(() => import('./components/insights/Insights.jsx'));
 
 /**
  * Vibecoding Project Tracker.
  *
  *   src/data/model.js           Team / Project / Task typedefs, STAGES, storage keys
- *   src/data/seed.js            mock team, project and tasks for first load
+ *   src/data/seed.js            demo team, project and tasks, loaded when localStorage is empty
  *   src/data/tasks.js, team.js, anchors.js  pure update helpers
  *   src/hooks/useLocalStorage.js
  *   src/theme/tokens.js         light + dark colour tokens (read by tailwind.config.js)
  *   src/hooks/useTheme.js       light / dark mode (ThemeToggle in the header)
  *   src/data/filters.js         board filter matching (FilterBar)
+ *   src/data/insights.js        Insights view stats + suggested AI tool (M12)
  *   src/components/             AnchorBoard → AnchorCard, TeamMembersStrip, FilterBar, Board → Column → TaskCard,
  *                               TaskModal, TeamPanel, Toast (+ shared Dialog,
- *                               FormField, Avatar, TypeBadge)
+ *                               FormField, Avatar, TypeBadge), ViewSwitch,
+ *                               insights/ (Insights → Progress, Tool, BestWorst)
  *
  * Search for `TODO M<n>` to find the hook for each remaining milestone.
  */
@@ -56,6 +62,8 @@ export default function App() {
   const [modal, setModal] = useState(null);
   const [saveError, setSaveError] = useState(null);
   const [teamOpen, setTeamOpen] = useState(false);
+  // 'board' | 'insights' (ViewSwitch in the header). For this visit only.
+  const [view, setView] = useState('board');
   const [toast, setToast] = useState(null);
   // Board filters (FilterBar). Kept for this visit only, not saved.
   const [filters, setFilters] = useState(NO_FILTERS);
@@ -156,7 +164,8 @@ export default function App() {
             {team.name} · {project.name}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <ViewSwitch view={view} onChange={setView} />
           <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
           <button
             type="button"
@@ -189,33 +198,42 @@ export default function App() {
         </div>
       )}
 
-      <AnchorBoard anchors={projectAnchors(anchors, project.id)} onSave={handleSaveAnchor} />
+      {view === 'insights' ? (
+        <Suspense fallback={<p className="text-sm text-muted">Loading insights…</p>}>
+          <Insights tasks={projectTasks} members={team.members} projectName={project.name} isDark={isDark} />
+        </Suspense>
+      ) : (
+        <>
+          <AnchorBoard anchors={projectAnchors(anchors, project.id)} onSave={handleSaveAnchor} />
 
-      <TeamMembersStrip members={team.members} tasks={projectTasks} onOpenTask={openModal} />
+          <TeamMembersStrip members={team.members} tasks={projectTasks} onOpenTask={openModal} />
 
-      <DueLegend />
+          <DueLegend />
 
-      <FilterBar
-        filters={filters}
-        onChange={setFilters}
-        members={team.members}
-        shownCount={visibleTasks.length}
-        totalCount={projectTasks.length}
-      />
+          <FilterBar
+            filters={filters}
+            onChange={setFilters}
+            members={team.members}
+            shownCount={visibleTasks.length}
+            totalCount={projectTasks.length}
+          />
 
-      <Board
-        tasks={visibleTasks}
-        isFiltered={hasFilters(filters)}
-        members={team.members}
-        onOpenTask={openModal}
-        onCopyContext={handleCopyContext}
-        onMoveTask={handleMoveTask}
-      />
+          <Board
+            tasks={visibleTasks}
+            isFiltered={hasFilters(filters)}
+            members={team.members}
+            onOpenTask={openModal}
+            onCopyContext={handleCopyContext}
+            onMoveTask={handleMoveTask}
+          />
+        </>
+      )}
 
       {modal && (
         <TaskModal
           key={modal.task?.id ?? 'new'}
           task={modal.task}
+          tasks={projectTasks}
           members={team.members}
           onSave={handleSave}
           onDelete={handleDelete}

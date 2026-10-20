@@ -4,6 +4,43 @@
 
 ## What was built
 
+### Insights view (secret sauce)
+
+- **A Board / Insights switch in the header** (two toggle buttons with `aria-pressed`) swaps the board for an **Insights** page. Every number is worked out live from this team's own logged tasks in `src/data/insights.js`, and the page says "Based on this team's own logged tasks". Recharts 2.15.4 draws the charts. Insights is lazy-loaded, so Recharts (389 kB, 109 kB gzipped) is only downloaded when the view is first opened, and the board's bundle stays the size it was.
+- **1. Progress:** a bar chart of tasks per status (To Do, In Progress, Review, Done) with the count on each bar, a large "% complete" figure (Done ÷ all tasks) with a meter, and a **Team member** select: Whole team, each member, or Unassigned.
+- **2. AI tool performance:** one horizontal stacked bar per AI tool (`contextTool`) showing Worked / Partial / Failed, with each tool's success rate on the right-hand axis. Success rate = Worked ÷ (Worked + Partial + Failed). "Not tried yet" tasks don't count; they appear in the table.
+- **3. Best / lowest AI:** two cards naming the tools with the highest and lowest success rate, for example "Claude, 71% success · worked on 5 of 7 tasks". Only tools with at least 3 tasks marked Worked, Partial or Failed are ranked. "Other" is a mix of tools, so it is never ranked. If no tool qualifies, or only one does (for the lowest card), the card says **"Not enough data yet"** and why. A caption lists the tools that weren't ranked, e.g. "Replit (1 of 3)".
+- **4. Suggested AI on the task modal:** a note above the AI tool field, e.g. "Suggested AI tool for bugs: Claude. Claude worked on 4 of 5 bug tasks (80%). Based on this team's history, not a general ranking."
+  - It picks the tool with the best success rate on past tasks of the same type (feature or bug), using the same 3-task rule. On a tie, the tool with more tasks wins.
+  - It updates when the Type toggle changes, and the task being edited doesn't count towards its own suggestion.
+  - A **Use {tool}** button fills in the AI tool select and moves focus to it, after which the note shows "Selected".
+  - With too little history it says "No suggested AI tool for features yet." and explains the minimum.
+- **Accessibility:**
+  - Every chart has a written text summary with all its numbers. The summary is also the chart's accessible description (`role="img"` + `aria-describedby`). The Progress summary is an `aria-live` region, so changing the member is announced.
+  - Every chart has a **View as table** button that swaps the chart for a data table with a caption and row/column headers.
+  - Outcome colours are paired with patterns and labels: Worked is solid, Partial is striped and Failed is dotted. A labelled legend sits above the chart, and the same pattern swatches appear in the tooltip and the table headers.
+  - All controls are keyboard reachable with the `brand` focus ring. Chart animation is off with reduced motion.
+- **Dark mode:** chart colours come from the theme tokens for the current theme, so bars, patterns, axis text and grid lines switch with the toggle.
+- **Demo data as the default seed:**
+  - The seed (`src/data/seed.js`) has **6 team members**, each with an avatar colour (teal, magenta, lime, cyan, orchid, olive), and **30 tasks**: 7 To Do, 7 In Progress, 6 Review, 10 Done; 19 features and 11 bugs.
+  - Due dates are relative to today, so the board always has 5 overdue, 7 due soon, 7 calm, 10 done and 1 with no due date.
+  - Every AI tool is used, and outcomes are varied: 13 Worked, 6 Partial, 6 Failed and 4 Not tried. One task has no tool yet.
+  - Tasks have realistic vibecoding titles, descriptions and Markdown Context (Background / Constraints / Tried so far / Pick up), plus AI problems on every Partial and Failed task.
+  - The outcomes are chosen so Insights tells a story: Claude has the best rate (71%) and worked on 4 of 5 bug tasks, Cursor is best for features (3 of 4), Gemini is lowest (25%), and Replit and Other are "not ranked".
+  - **It loads automatically whenever localStorage is empty**, for example for a first-time visitor or an assessor opening the deployed link. Each storage key (`vibetracker.teams`, `.projects`, `.tasks`, `.anchors`) uses the seed as its `useLocalStorage` default and saves it straight away. After that, the user's own changes are saved as normal.
+  - **Saved data is never wiped or replaced.** If a key already has data, even an empty task list after the user deleted everything, that data is used and the seed is ignored. There is no button to load or reset demo data.
+- **Tested** in headless Edge against the production build:
+  - First load with empty localStorage: the board shows the 30 demo tasks and 6 members, and the seed is written to localStorage. There is no "Demo data" button.
+  - Saved data is kept after a reload, not replaced by the seed: a cut-down list of 5 tasks, an old 1-task list, and an empty list all stay as saved.
+  - Insights summaries, best/lowest and the "not ranked" caption are correct. The member and Unassigned filters work. The tool chart uses the three patterns and the rate axis shows each rate. Both tables open with the right rows.
+  - Modal suggestions: Cursor for features (3 of 4), Claude for bugs (4 of 5). Editing vt-26 gives "3 of 4" because it doesn't count itself. "Use Claude" sets and focuses the select.
+  - With no tasks, Insights says "Not enough data yet" and "No AI tools logged yet".
+  - No horizontal scroll at 390px.
+  - axe-core (WCAG 2.1 A/AA): no violations on Insights (charts and tables) or the task modal, in light and dark mode.
+- `npm run build` passes.
+
+### Drag and drop (also built in M12)
+
 - **Drag and drop between the four columns** (To Do, In Progress, Review, Done) using `@dnd-kit/core` 6.3.1 instead of raw HTML5 drag events, so it works with the keyboard, screen readers and touch screens.
 - **Dropping a card in a column changes its status** and saves it to localStorage (`vibetracker.tasks`) through the existing `useLocalStorage` hook. The card goes to the bottom of its new column. Dropping it back in its own column, or outside any column, changes nothing. The status dropdown in the modal still works as before.
 - **While dragging:**
@@ -28,6 +65,28 @@
 
 ## Components / files changed
 
+### Insights view
+
+| File | Change |
+|---|---|
+| `package.json`, `package-lock.json` | Added `recharts` (^2.15.4) |
+| `src/data/insights.js` | New. `tasksForMember`, `progressStats`, `toolStats`, `rankableTools`, `bestAndWorst`, `suggestTool`; `MIN_TASKS_FOR_RANKING = 3`, `TRIED_OUTCOMES` |
+| `src/components/insights/Insights.jsx` | New. The Insights page: intro, layout, theme palette, reduced-motion check |
+| `src/components/insights/ProgressInsight.jsx` | New. Member select, % complete meter, tasks-per-status bar chart, summary, table |
+| `src/components/insights/ToolInsight.jsx` | New. Outcome legend, stacked bar chart per tool with rate axis, tooltip, summary, table |
+| `src/components/insights/BestWorstInsight.jsx` | New. Best / lowest success rate cards, "Not enough data yet", not-ranked caption |
+| `src/components/insights/ChartCard.jsx` | New. Shared chart panel: title, summary (accessible description), "View as table" / "View as chart" toggle; shared table classes |
+| `src/components/insights/ChartTooltip.jsx` | New. Themed Recharts tooltip |
+| `src/components/insights/outcomeStyles.jsx` | New. Outcome colour + pattern map, SVG `<pattern>` defs, `OutcomeSwatch` |
+| `src/components/ViewSwitch.jsx` | New. Board / Insights toggle buttons |
+| `src/components/ContextSection.jsx` | New `ToolSuggestion` note above the AI tool field, with "Use {tool}"; select `aria-describedby` it |
+| `src/components/TaskModal.jsx` | Takes `tasks`; works out `suggestTool(tasks, form.type, task.id)` and passes it to `ContextSection` |
+| `src/data/seed.js` | Rewritten: 6 members, 1 project, 30 tasks and empty deliverables, with dates relative to the first load; exported as `SEED_TEAMS`, `SEED_PROJECTS`, `SEED_TASKS`, `SEED_ANCHORS`, the defaults for empty storage keys |
+| `src/App.jsx` | `view` state + `ViewSwitch`; lazy-loaded `Insights` with `Suspense`; passes `tasks` to `TaskModal` |
+| `DESIGN.md` | §4 Insights view and suggested AI tool; §5 new microcopy; §7 Insights bar animation |
+
+### Drag and drop
+
 | File | Change |
 |---|---|
 | `package.json`, `package-lock.json` | Added `@dnd-kit/core` (^6.3.1) |
@@ -39,6 +98,40 @@
 | `DESIGN.md` | §4 describes drag and drop instead of "no drag-and-drop"; §5 adds the "Drop it here." text and the announcements; §7 allows the drag motion (off with reduced motion) |
 
 ## Colours, fonts, icons & interactions used
+
+### Insights view
+
+**Colours (Tailwind tokens / `src/theme/tokens.js`)**
+
+| Element | Tokens |
+|---|---|
+| View switch, current view | `bg-brand-soft`, `text-ink`, icon `text-brand`; others `text-ink-soft`, hover `bg-muted-bg` |
+| Chart panels, best/lowest cards | `bg-card`, `border-line` |
+| Progress bars | `brand` (#2563EB light / #60A5FA dark); Done bar `success` (#16A34A / #4ADE80) |
+| % complete meter | `bg-success` on `bg-muted-bg` |
+| Outcome: Worked | solid `success` |
+| Outcome: Partial | `due-warning` (#D97706 / #FBBF24) with diagonal stripes in `card` at 75% |
+| Outcome: Failed | `danger` (#DC2626 / #F87171) with dots in `card` at 85% |
+| Chart axis text / grid / hover band | `ink` and `ink-soft` / `line` / `muted-bg` |
+| Best / lowest icons | `text-success` / `text-danger` |
+| Suggested AI note | `bg-brand-soft`, `border-brand/40`, `Lightbulb` in `text-brand`; "Selected" in `text-success-text` |
+
+**Fonts:** Inter throughout. Card and chart titles `text-base` semibold; % complete and best/lowest tool names `text-2xl` semibold; summaries `text-sm` `ink-soft`; chart ticks 12px; table numbers `tabular-nums`.
+
+**Icons (Lucide):** `SquareKanban` (Board), `BarChart3` (Insights / View as chart), `Table` (View as table), `TrendingUp` (best), `TrendingDown` (lowest), `Lightbulb` (suggested tool), `Check` (Selected).
+
+**Interactions**
+
+| Input | Interaction |
+|---|---|
+| View switch | Click / Enter / Space; `aria-pressed` on the current view |
+| Progress member select | Native select; summary updates and is announced (`aria-live="polite"`) |
+| View as table / View as chart | Swaps the chart and the table in place; `aria-controls` the chart body |
+| Chart hover | Recharts tooltip with labels and pattern swatches (mouse only; the summary and table carry the same data) |
+| Use {tool} | Sets the AI tool select and focuses it |
+| Motion | Recharts bars grow in; turned off with `prefers-reduced-motion: reduce` |
+
+### Drag and drop
 
 **Colours (Tailwind tokens)**
 

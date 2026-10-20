@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { AlertTriangle, Trash2, X } from 'lucide-react';
 import { contextChanged, contextValues, NEW_TASK_CONTEXT } from '../data/context.js';
 import { dueState } from '../data/due.js';
+import { suggestTool } from '../data/insights.js';
 import { STAGES, TASK_TYPES } from '../data/model.js';
 import Avatar from './Avatar.jsx';
 import ContextSection from './ContextSection.jsx';
@@ -28,8 +29,9 @@ const EMPTY_FORM = {
  * Delete asks for confirmation inline before calling `onDelete`.
  * `saveError` (set by the parent when storage is full) is shown above the
  * footer; the form keeps everything typed so nothing is lost.
+ * `tasks` (the project's tasks) feed the suggested AI tool (M12).
  */
-export default function TaskModal({ task, members, onSave, onDelete, onHandOff, onCopyContext, onClose, saveError }) {
+export default function TaskModal({ task, tasks, members, onSave, onDelete, onHandOff, onCopyContext, onClose, saveError }) {
   const isEdit = task != null;
   const [form, setForm] = useState(() =>
     isEdit
@@ -54,6 +56,8 @@ export default function TaskModal({ task, members, onSave, onDelete, onHandOff, 
   // Live preview of the card's due chip as the date / status change.
   const due = dueState({ dueDate: form.dueDate || null, status: form.status });
   const handOffTargets = members.filter((m) => m.id !== form.assignee);
+  // Follows the Type toggle; the task being edited doesn't count towards itself.
+  const suggestion = suggestTool(tasks, form.type, task?.id);
 
   function update(field) {
     return (e) => {
@@ -237,6 +241,8 @@ export default function TaskModal({ task, members, onSave, onDelete, onHandOff, 
             onChange={(field, value) => setForm((f) => ({ ...f, [field]: value }))}
             updatedAt={isEdit ? task.contextUpdatedAt : null}
             dirty={contextDirty}
+            suggestion={suggestion}
+            taskType={form.type}
           />
         </div>
 
