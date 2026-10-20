@@ -1,5 +1,5 @@
 import { useDraggable, useDroppable } from '@dnd-kit/core';
-import { Check } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import TaskCard from './TaskCard.jsx';
 
 /**
@@ -11,20 +11,39 @@ import TaskCard from './TaskCard.jsx';
  *
  * With filters on (`isFiltered`), `tasks` and the count pill are the matching
  * tasks only, and an empty column says so instead of "Enjoy the quiet".
+ *
+ * The arrow button in the header collapses the column (`isCollapsed`): the
+ * cards are hidden but the header, its count and the column's width stay.
+ * Arrow down = expanded, arrow up = collapsed. A collapsed column is still
+ * a drop target.
  */
-export default function Column({ stage, tasks, isFiltered, membersById, onOpenTask, onCopyContext }) {
+export default function Column({
+  stage,
+  tasks,
+  isFiltered,
+  isCollapsed,
+  onToggleCollapsed,
+  membersById,
+  onOpenTask,
+  onCopyContext,
+}) {
   const isDone = stage.id === 'done';
   const { setNodeRef, isOver } = useDroppable({ id: stage.id });
+  const bodyId = `column-${stage.id}-body`;
+  const toggleLabel = `${isCollapsed ? 'Expand' : 'Collapse'} ${stage.label}`;
+  const ToggleIcon = isCollapsed ? ChevronUp : ChevronDown;
 
   return (
     <section
       ref={setNodeRef}
       aria-labelledby={`column-${stage.id}`}
-      className={`flex min-h-[16rem] flex-col rounded border-t-4 p-3 transition-colors ${
-        isDone ? 'border-success' : 'border-transparent'
-      } ${isOver ? 'bg-brand-soft ring-2 ring-brand' : 'bg-muted-bg'}`}
+      className={`flex flex-col rounded border-t-4 p-3 transition-colors ${
+        isCollapsed ? 'self-start' : 'min-h-[16rem]'
+      } ${isDone ? 'border-success' : 'border-transparent'} ${
+        isOver ? 'bg-brand-soft ring-2 ring-brand' : 'bg-muted-bg'
+      }`}
     >
-      <header className="mb-3 flex items-center justify-between">
+      <header className={`flex items-center justify-between gap-2 ${isCollapsed ? '' : 'mb-3'}`}>
         <h2
           id={`column-${stage.id}`}
           className="flex items-center gap-1.5 text-base font-semibold uppercase tracking-wide text-ink"
@@ -32,34 +51,49 @@ export default function Column({ stage, tasks, isFiltered, membersById, onOpenTa
           {isDone && <Check aria-hidden="true" className="h-4 w-4 text-success" strokeWidth={3} />}
           {stage.label}
         </h2>
-        <span className="rounded-full bg-card px-2 py-0.5 text-xs font-medium text-ink-soft">
-          {tasks.length}
-          <span className="sr-only"> tasks</span>
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="rounded-full bg-card px-2 py-0.5 text-xs font-medium text-ink-soft">
+            {tasks.length}
+            <span className="sr-only"> tasks</span>
+          </span>
+          <button
+            type="button"
+            onClick={onToggleCollapsed}
+            aria-expanded={!isCollapsed}
+            aria-controls={bodyId}
+            aria-label={toggleLabel}
+            title={toggleLabel}
+            className="rounded p-1 text-ink-soft hover:bg-card hover:text-ink focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-muted-bg"
+          >
+            <ToggleIcon aria-hidden="true" className="h-4 w-4" />
+          </button>
+        </div>
       </header>
 
-      {tasks.length === 0 ? (
-        <p
-          className={`rounded border border-dashed p-4 text-center text-xs text-ink-soft ${
-            isOver ? 'border-brand' : 'border-line'
-          }`}
-        >
-          {isOver ? 'Drop it here.' : isFiltered ? 'No tasks match these filters' : 'Nothing here. Enjoy the quiet.'}
-        </p>
-      ) : (
-        <ul className="flex flex-col gap-2">
-          {tasks.map((task) => (
-            <li key={task.id}>
-              <DraggableTaskCard
-                task={task}
-                member={membersById[task.assignee]}
-                onOpen={onOpenTask}
-                onCopyContext={onCopyContext}
-              />
-            </li>
-          ))}
-        </ul>
-      )}
+      <div id={bodyId} hidden={isCollapsed}>
+        {isCollapsed ? null : tasks.length === 0 ? (
+          <p
+            className={`rounded border border-dashed p-4 text-center text-xs text-ink-soft ${
+              isOver ? 'border-brand' : 'border-line'
+            }`}
+          >
+            {isOver ? 'Drop it here.' : isFiltered ? 'No tasks match these filters' : 'Nothing here. Enjoy the quiet.'}
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {tasks.map((task) => (
+              <li key={task.id}>
+                <DraggableTaskCard
+                  task={task}
+                  member={membersById[task.assignee]}
+                  onOpen={onOpenTask}
+                  onCopyContext={onCopyContext}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </section>
   );
 }

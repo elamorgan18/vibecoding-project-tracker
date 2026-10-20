@@ -10,7 +10,8 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { STAGES } from '../data/model.js';
+import { STAGES, STORAGE_KEYS } from '../data/model.js';
+import { useLocalStorage } from '../hooks/useLocalStorage.js';
 import Column from './Column.jsx';
 import TaskCard from './TaskCard.jsx';
 
@@ -97,10 +98,14 @@ const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)')
  *
  * `tasks` is already filtered (FilterBar). Columns stay drop targets while
  * filtered; a card moved out of the filter's scope drops out of view.
+ *
+ * Each column can be collapsed to just its header; which ones are collapsed
+ * is saved in localStorage. A collapsed column is still a drop target.
  */
 export default function Board({ tasks, isFiltered, members, onOpenTask, onCopyContext, onMoveTask }) {
   const membersById = Object.fromEntries(members.map((m) => [m.id, m]));
   const [activeTask, setActiveTask] = useState(null);
+  const [collapsed, setCollapsed] = useLocalStorage(STORAGE_KEYS.collapsedColumns, {});
   // Swallow the click the browser may fire on the card at the end of a drag.
   const justDragged = useRef(false);
 
@@ -130,6 +135,10 @@ export default function Board({ tasks, isFiltered, members, onOpenTask, onCopyCo
     finishDrag();
   }
 
+  function toggleColumn(stageId) {
+    setCollapsed((prev) => ({ ...prev, [stageId]: !prev[stageId] }));
+  }
+
   function handleOpen(task) {
     if (!justDragged.current) onOpenTask(task);
   }
@@ -150,6 +159,8 @@ export default function Board({ tasks, isFiltered, members, onOpenTask, onCopyCo
             stage={stage}
             tasks={tasks.filter((task) => task.status === stage.id)}
             isFiltered={isFiltered}
+            isCollapsed={Boolean(collapsed[stage.id])}
+            onToggleCollapsed={() => toggleColumn(stage.id)}
             membersById={membersById}
             onOpenTask={handleOpen}
             onCopyContext={onCopyContext}

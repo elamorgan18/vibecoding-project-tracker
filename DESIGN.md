@@ -299,6 +299,14 @@ Cards are tinted by type (`feature-soft` or `bug-soft`) with a 1px border in the
 - Drag and drop and Copy Context work as normal while filtered. A card moved out of the filters' scope, for example into Done while "Overdue" is ticked, drops out of view, and the count updates.
 - Filters last for the visit only. They are not saved to localStorage.
 
+**Collapsible columns.** Each column header has a small arrow button to the right of the count pill: a Lucide `ChevronDown` while the column is expanded and `ChevronUp` while it is collapsed. Rules:
+
+- Collapsing hides the column's cards (or its empty-state message). The header with the column name and task count stays visible at the same width. The column shrinks to the header's height (`self-start`, no `min-h`).
+- The button's label names the action and the column ("Collapse In Progress" / "Expand In Progress"), which is also its `title` tooltip. It has `aria-expanded` and `aria-controls` pointing at the column body.
+- The icon is `ink-soft` and turns `ink` on a `card` hover background. It has the 2px `brand` focus ring, offset on `muted-bg`. Enter and Space toggle it. It uses theme tokens, so it works in dark mode without extra classes.
+- A collapsed column is still a drop target. Dropping a card into it (mouse, touch or keyboard) updates the count, and the `brand` ring shows around the header.
+- Each column's state is saved in localStorage under `vibetracker.collapsedColumns` (`{ [stageId]: true }`), so it survives a reload.
+
 ## 5. Voice / microcopy
 
 Calm, short, second person. No exclamation marks unless something is actually wrong.

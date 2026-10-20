@@ -384,3 +384,15 @@ Add a filter bar above the board. Filters: Team member (multi-select, with avata
 ````
 
 **Summary:** Added a filter bar above the board. It has Team member and Due date disclosure menus of checkboxes (OR within a group, AND across groups), removable chips, "Clear filters", and an aria-live result count. Empty filtered columns say "No tasks match these filters". New files: `src/data/filters.js` (matching logic) and `src/components/FilterBar.jsx`. Wired into `App.jsx`, `Board.jsx` and `Column.jsx`. Updated `DESIGN.md` §4, §5 and §7. "Due within 24h" means due today or tomorrow, so a task due in exactly 2 days matches no due-date option. Tested in headless Edge: 32/32 checks passed, including keyboard and mouse drag while filtered, Copy Context, focus handling, and axe (light and dark). `npm run build` passes.
+
+### 2026-10-20 15:07 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Make each board column collapsible with a simple arrow button in the column header: arrow down when expanded, arrow up when collapsed. Collapsing hides the column's cards but keeps the header (name and task count) visible at the same width. Give the button an accessible label ("Collapse In Progress" / "Expand In Progress") and aria-expanded. Remember each column's state in localStorage. Keyboard accessible with visible focus, and works in dark mode.
+````
+
+**Summary:** Added a collapse button to each column header (`ChevronDown` when expanded, `ChevronUp` when collapsed). It has a "Collapse/Expand <column>" label, `aria-expanded`/`aria-controls` and the `brand` focus ring. A collapsed column keeps its header, count and width, and is still a drop target. State is saved under the new `STORAGE_KEYS.collapsedColumns` (`vibetracker.collapsedColumns`) via `useLocalStorage`. Files: `Column.jsx`, `Board.jsx`, `model.js`, DESIGN.md §4. Tested in headless Edge: labels, icons, hiding, width, persistence across reload, Enter/Space, focus ring, keyboard drop into a collapsed column, and axe in light and dark all passed. `npm run build` passes.

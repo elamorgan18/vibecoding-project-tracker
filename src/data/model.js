@@ -79,4 +79,6 @@ export const STORAGE_KEYS = {
   // 'light' | 'dark' once the user picks one; null = follow the system.
   // index.html reads this key too, to set the theme before the first paint.
   theme: 'vibetracker.theme',
+  // { [stageId]: true } for each board column the user has collapsed.
+  collapsedColumns: 'vibetracker.collapsedColumns',
 };
