@@ -186,6 +186,10 @@ Calm, short, second person. No exclamation marks unless something is actually wr
 | Handoff toast (M7 `task-owner`, success) | "Handed to {name}. It's on their board now." |
 | Form error: missing title (danger) | "Give this task a title." |
 | Deliverable slot: filled / empty | "Added" / "Not added yet" |
+| Hand-off dropdown placeholder (M7) | "Hand off to…" |
+| Driving strip (M7): heading / empty member | "Who's driving what" / "Nothing in progress" |
+| Team panel: add / remove toasts (success) | "Added {name} to the team." / "Removed {name} from the team." |
+| Team panel: remove confirm (danger) | "Remove {name} from the team? Their {n} tasks will become unassigned." |
 
 ## 6. Logo / wordmark
 

@@ -1,5 +1,7 @@
 /** Pure helpers for creating and updating tasks. */
 
+import { nextId } from './ids.js';
+
 /** Today as a local ISO date 'YYYY-MM-DD' (not UTC, so late-night dates don't jump a day). */
 export function todayISO() {
   const d = new Date();
@@ -9,11 +11,17 @@ export function todayISO() {
 
 /** Next readable task ID, e.g. 'vt-5' when the highest existing one is 'vt-4'. */
 export function nextTaskId(tasks) {
-  const max = tasks.reduce((highest, task) => {
-    const n = Number(task.id.replace(/^vt-/, ''));
-    return Number.isFinite(n) ? Math.max(highest, n) : highest;
-  }, 0);
-  return `vt-${max + 1}`;
+  return nextId(tasks, 'vt');
+}
+
+/** Reassign one task to a different member. */
+export function reassignTask(tasks, id, memberId) {
+  return tasks.map((t) => (t.id === id ? { ...t, assignee: memberId } : t));
+}
+
+/** Unassign every task owned by a member (used when they leave the team). */
+export function unassignMember(tasks, memberId) {
+  return tasks.map((t) => (t.assignee === memberId ? { ...t, assignee: null } : t));
 }
 
 /** Insert a new task or replace an existing one with the same id. */

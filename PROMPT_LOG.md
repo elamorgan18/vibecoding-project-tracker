@@ -177,3 +177,29 @@ Update M6: give each card a soft background tint by type: feature cards use the 
 ````
 
 **Summary:** Cards and the modal header are now tinted by type with a thin type-colour border, and the corner badge is a white pill (`TypeBadge.jsx`, `TaskCard.jsx`, `TaskModal.jsx`). Captions switched from `muted` (fails AA on tints) to `ink-soft`. Updated `DESIGN.md` §2.3–2.6 and §4 (type = tint + icon + label; M8 due = left border + chip), tested in jsdom (35/35 passed), and recorded the update in `docs/decisions/M6-tag-style.md`.
+
+## M7 – task-owner
+
+### 2026-10-20 12:37 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+M7: Show the assignee's initials/avatar prominently on each card. Add a "Hand off to…" dropdown in the modal that reassigns the task, with a visual confirmation (e.g. toast). Add a strip at the top showing what each team member is currently driving. Also add a Team screen or panel where I can add a new member (name, email, GitHub username), view members, and remove one; new members appear in the assignee dropdowns. Persist to localStorage. Fill in the factual sections of docs/decisions/M7-task-owner.md.
+````
+
+**Summary:** Added `Avatar`, `Toast`, `DrivingStrip`, `TeamPanel`, the shared `Dialog`/`FormField` components, and `src/data/ids.js` / `team.js`. Updated `TaskModal` (Owner + "Hand off to…"), `TaskCard`, `App.jsx`, `src/data/tasks.js`, `tailwind.config.js` (toast animation) and the `DESIGN.md` microcopy. Tested in jsdom (71/71 passed) and filled in `docs/decisions/M7-task-owner.md`.
+
+### 2026-10-20 12:43 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Bug fix (M7): when a card is clicked or focused it gets a purple border regardless of type. Change the selected/focused state to use a brand-colour ring (not the feature or bug colour) with a small offset, so it sits outside the card's own type border and doesn't change the card's type colouring. Keep it clearly visible for keyboard focus (WCAG 2.4.7). Apply the same selected style to every card. Note the fix in docs/decisions/M7-task-owner.md (factual sections only).
+````
+
+**Summary:** The cause was the blue focus ring sitting flush against the violet/rose type border (1.10:1), so the two blended into a purple edge. In `src/components/TaskCard.jsx` I added a shared `FOCUS_RING` with a 2px `muted-bg` offset so the brand ring sits outside the type border on every card. Tested in jsdom (75/75 passed) and noted the fix in `docs/decisions/M7-task-owner.md`.

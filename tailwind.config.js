@@ -73,6 +73,16 @@ export default {
           },
         },
       },
+      // 200 ms fade-in for toasts (DESIGN.md §7).
+      keyframes: {
+        'toast-in': {
+          from: { opacity: '0', transform: 'translateY(4px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        'toast-in': 'toast-in 200ms ease-out',
+      },
       // tweakcn --radius: 0.375rem. `rounded` and `rounded-md` both use it.
       borderRadius: {
         DEFAULT: '0.375rem',

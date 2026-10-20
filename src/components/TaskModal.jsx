@@ -1,6 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { AlertCircle, AlertTriangle, Trash2, X } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { AlertTriangle, ArrowRightLeft, Trash2, X } from 'lucide-react';
 import { STAGES, TASK_TYPES } from '../data/model.js';
+import Avatar from './Avatar.jsx';
+import Dialog from './Dialog.jsx';
+import FormField, { inputBorder, inputClass } from './FormField.jsx';
 import TypeBadge, { TYPE_META } from './TypeBadge.jsx';
 
 const EMPTY_FORM = {
@@ -12,26 +15,13 @@ const EMPTY_FORM = {
   dueDate: '',
 };
 
-const inputClass =
-  'w-full rounded border bg-card px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand';
-
-function Field({ id, label, children, hint }) {
-  return (
-    <div>
-      <label htmlFor={id} className="mb-1 block text-sm font-medium text-ink">
-        {label}
-      </label>
-      {children}
-      {hint}
-    </div>
-  );
-}
-
 /**
  * Add / edit modal for a task. `task` is null in create mode.
+ * In edit mode the assignee is shown as the task's owner with a
+ * "Hand off to…" dropdown that reassigns immediately via `onHandOff`.
  * Delete asks for confirmation inline before calling `onDelete`.
  */
-export default function TaskModal({ task, members, onSave, onDelete, onClose }) {
+export default function TaskModal({ task, members, onSave, onDelete, onHandOff, onClose }) {
   const isEdit = task != null;
   const [form, setForm] = useState(() =>
     isEdit
@@ -47,49 +37,23 @@ export default function TaskModal({ task, members, onSave, onDelete, onClose }) 
   );
   const [titleError, setTitleError] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
-  const dialogRef = useRef(null);
   const titleRef = useRef(null);
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
 
-  // Focus the title on open, keep Tab inside the dialog, close on Escape,
-  // and hand focus back to whatever opened the modal when it closes.
-  useEffect(() => {
-    const opener = document.activeElement;
-    titleRef.current?.focus();
-
-    function onKeyDown(e) {
-      if (e.key === 'Escape') {
-        onCloseRef.current();
-        return;
-      }
-      if (e.key !== 'Tab') return;
-      const focusable = dialogRef.current.querySelectorAll(
-        'button, input, select, textarea, [tabindex]:not([tabindex="-1"])',
-      );
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    }
-
-    document.addEventListener('keydown', onKeyDown);
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-      opener?.focus?.();
-    };
-  }, []);
+  const owner = members.find((m) => m.id === form.assignee);
+  const handOffTargets = members.filter((m) => m.id !== form.assignee);
 
   function update(field) {
     return (e) => {
       setForm((f) => ({ ...f, [field]: e.target.value }));
       if (field === 'title') setTitleError(false);
     };
+  }
+
+  function handleHandOff(e) {
+    const memberId = e.target.value;
+    if (!memberId) return;
+    setForm((f) => ({ ...f, assignee: memberId }));
+    onHandOff(task.id, memberId);
   }
 
   function handleSubmit(e) {
@@ -110,122 +74,139 @@ export default function TaskModal({ task, members, onSave, onDelete, onClose }) 
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/40 p-4 sm:items-center"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="task-modal-title"
-        className="w-full max-w-lg rounded border border-line bg-card shadow-xl"
+    <Dialog labelledBy="task-modal-title" onClose={onClose} initialFocusRef={titleRef}>
+      <header
+        className={`flex items-start justify-between rounded-t border-b border-line px-5 py-4 ${TYPE_META[form.type].tint}`}
       >
-        <header
-          className={`flex items-start justify-between rounded-t border-b border-line px-5 py-4 ${TYPE_META[form.type].tint}`}
-        >
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 id="task-modal-title" className="text-base font-semibold text-ink">
-                {isEdit ? 'Edit task' : 'New task'}
-              </h2>
-              <TypeBadge type={form.type} />
-            </div>
-            {isEdit && (
-              <p className="mt-0.5 font-mono text-xs text-ink-soft">
-                {task.id} · created {task.createdDate}
-              </p>
-            )}
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 id="task-modal-title" className="text-base font-semibold text-ink">
+              {isEdit ? 'Edit task' : 'New task'}
+            </h2>
+            <TypeBadge type={form.type} />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded p-1 text-ink-soft hover:bg-card hover:text-ink focus:outline-none focus:ring-2 focus:ring-brand"
-          >
-            <X aria-hidden="true" className="h-5 w-5" />
-            <span className="sr-only">Close</span>
-          </button>
-        </header>
+          {isEdit && (
+            <p className="mt-0.5 font-mono text-xs text-ink-soft">
+              {task.id} · created {task.createdDate}
+            </p>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded p-1 text-ink-soft hover:bg-card hover:text-ink focus:outline-none focus:ring-2 focus:ring-brand"
+        >
+          <X aria-hidden="true" className="h-5 w-5" />
+          <span className="sr-only">Close</span>
+        </button>
+      </header>
 
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="space-y-4 px-5 py-4">
-            <Field
-              id="task-title"
-              label="Title"
-              hint={
-                titleError && (
-                  <p id="task-title-error" className="mt-1 flex items-center gap-1 text-xs text-danger-text">
-                    <AlertCircle aria-hidden="true" className="h-3.5 w-3.5" />
-                    Give this task a title.
+      <form onSubmit={handleSubmit} noValidate>
+        <div className="space-y-4 px-5 py-4">
+          {isEdit && (
+            <div className="flex flex-col gap-3 rounded border border-line bg-surface p-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <Avatar member={owner} />
+                <div>
+                  <p className="text-xs text-muted">Owner</p>
+                  <p id="task-owner" className="text-sm font-medium text-ink">
+                    {owner ? owner.name : 'Unassigned'}
                   </p>
-                )
-              }
-            >
-              <input
-                ref={titleRef}
-                id="task-title"
-                type="text"
-                value={form.title}
-                onChange={update('title')}
-                aria-invalid={titleError}
-                aria-describedby={titleError ? 'task-title-error' : undefined}
-                className={`${inputClass} ${titleError ? 'border-danger' : 'border-line'}`}
-              />
-            </Field>
-
-            <Field id="task-description" label="Description">
-              <textarea
-                id="task-description"
-                rows={3}
-                value={form.description}
-                onChange={update('description')}
-                className={`${inputClass} border-line`}
-              />
-            </Field>
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <fieldset>
-                <legend className="mb-1 block text-sm font-medium text-ink">Type</legend>
-                <div className="grid grid-cols-2 gap-2">
-                  {TASK_TYPES.map((type) => {
-                    const { label, Icon, icon, selected } = TYPE_META[type];
-                    const checked = form.type === type;
-                    return (
-                      <label
-                        key={type}
-                        className={`flex cursor-pointer items-center justify-center gap-1.5 rounded border px-3 py-2 text-sm font-medium focus-within:ring-2 focus-within:ring-brand ${
-                          checked ? selected : 'border-line text-ink-soft hover:bg-muted-bg'
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="task-type"
-                          value={type}
-                          checked={checked}
-                          onChange={update('type')}
-                          className="sr-only"
-                        />
-                        <Icon aria-hidden="true" className={`h-4 w-4 ${checked ? icon : ''}`} />
-                        {label}
-                      </label>
-                    );
-                  })}
                 </div>
-              </fieldset>
-
-              <Field id="task-status" label="Status">
-                <select id="task-status" value={form.status} onChange={update('status')} className={`${inputClass} border-line`}>
-                  {STAGES.map((stage) => (
-                    <option key={stage.id} value={stage.id}>
-                      {stage.label}
+              </div>
+              <div className="relative">
+                <label htmlFor="task-handoff" className="sr-only">
+                  Hand off to…
+                </label>
+                <ArrowRightLeft
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft"
+                />
+                <select
+                  id="task-handoff"
+                  value=""
+                  onChange={handleHandOff}
+                  disabled={handOffTargets.length === 0}
+                  className={`${inputClass} border-line pl-9 disabled:cursor-not-allowed disabled:bg-muted-bg disabled:text-ink-soft sm:w-56`}
+                >
+                  <option value="" disabled>
+                    {handOffTargets.length === 0 ? 'No one to hand off to' : 'Hand off to…'}
+                  </option>
+                  {handOffTargets.map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {member.name}
                     </option>
                   ))}
                 </select>
-              </Field>
+              </div>
+            </div>
+          )}
 
-              <Field id="task-assignee" label="Assignee">
+          <FormField id="task-title" label="Title" error={titleError && 'Give this task a title.'}>
+            <input
+              ref={titleRef}
+              id="task-title"
+              type="text"
+              value={form.title}
+              onChange={update('title')}
+              aria-invalid={titleError}
+              aria-describedby={titleError ? 'task-title-error' : undefined}
+              className={`${inputClass} ${inputBorder(titleError)}`}
+            />
+          </FormField>
+
+          <FormField id="task-description" label="Description">
+            <textarea
+              id="task-description"
+              rows={3}
+              value={form.description}
+              onChange={update('description')}
+              className={`${inputClass} border-line`}
+            />
+          </FormField>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <fieldset>
+              <legend className="mb-1 block text-sm font-medium text-ink">Type</legend>
+              <div className="grid grid-cols-2 gap-2">
+                {TASK_TYPES.map((type) => {
+                  const { label, Icon, icon, selected } = TYPE_META[type];
+                  const checked = form.type === type;
+                  return (
+                    <label
+                      key={type}
+                      className={`flex cursor-pointer items-center justify-center gap-1.5 rounded border px-3 py-2 text-sm font-medium focus-within:ring-2 focus-within:ring-brand ${
+                        checked ? selected : 'border-line text-ink-soft hover:bg-muted-bg'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="task-type"
+                        value={type}
+                        checked={checked}
+                        onChange={update('type')}
+                        className="sr-only"
+                      />
+                      <Icon aria-hidden="true" className={`h-4 w-4 ${checked ? icon : ''}`} />
+                      {label}
+                    </label>
+                  );
+                })}
+              </div>
+            </fieldset>
+
+            <FormField id="task-status" label="Status">
+              <select id="task-status" value={form.status} onChange={update('status')} className={`${inputClass} border-line`}>
+                {STAGES.map((stage) => (
+                  <option key={stage.id} value={stage.id}>
+                    {stage.label}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+
+            {!isEdit && (
+              <FormField id="task-assignee" label="Assignee">
                 <select
                   id="task-assignee"
                   value={form.assignee}
@@ -239,78 +220,78 @@ export default function TaskModal({ task, members, onSave, onDelete, onClose }) 
                     </option>
                   ))}
                 </select>
-              </Field>
+              </FormField>
+            )}
 
-              <Field id="task-due" label="Due date">
-                <input
-                  id="task-due"
-                  type="date"
-                  value={form.dueDate}
-                  onChange={update('dueDate')}
-                  className={`${inputClass} border-line`}
-                />
-              </Field>
+            <FormField id="task-due" label="Due date">
+              <input
+                id="task-due"
+                type="date"
+                value={form.dueDate}
+                onChange={update('dueDate')}
+                className={`${inputClass} border-line`}
+              />
+            </FormField>
+          </div>
+        </div>
+
+        {confirmingDelete ? (
+          <div className="flex flex-col gap-3 border-t border-line bg-danger-soft px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="flex items-start gap-2 text-sm text-ink">
+              <AlertTriangle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-danger" />
+              Delete this task and its prompt history? This can't be undone.
+            </p>
+            <div className="flex shrink-0 items-center gap-3">
+              <button
+                type="button"
+                autoFocus
+                onClick={() => setConfirmingDelete(false)}
+                className="rounded px-2 py-1 text-sm font-medium text-ink-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-brand"
+              >
+                Keep it
+              </button>
+              <button
+                type="button"
+                onClick={() => onDelete(task.id)}
+                className="flex items-center gap-1.5 rounded bg-danger px-3 py-2 text-sm font-medium text-white hover:bg-danger-hover focus:outline-none focus:ring-2 focus:ring-danger focus:ring-offset-2"
+              >
+                <Trash2 aria-hidden="true" className="h-4 w-4" />
+                Delete task
+              </button>
             </div>
           </div>
-
-          {confirmingDelete ? (
-            <div className="flex flex-col gap-3 border-t border-line bg-danger-soft px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="flex items-start gap-2 text-sm text-ink">
-                <AlertTriangle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-danger" />
-                Delete this task and its prompt history? This can't be undone.
-              </p>
-              <div className="flex shrink-0 items-center gap-3">
-                <button
-                  type="button"
-                  autoFocus
-                  onClick={() => setConfirmingDelete(false)}
-                  className="rounded px-2 py-1 text-sm font-medium text-ink-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-brand"
-                >
-                  Keep it
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onDelete(task.id)}
-                  className="flex items-center gap-1.5 rounded bg-danger px-3 py-2 text-sm font-medium text-white hover:bg-danger-hover focus:outline-none focus:ring-2 focus:ring-danger focus:ring-offset-2"
-                >
-                  <Trash2 aria-hidden="true" className="h-4 w-4" />
-                  Delete task
-                </button>
-              </div>
+        ) : (
+          <footer className="flex items-center justify-between border-t border-line px-5 py-4">
+            {isEdit ? (
+              <button
+                type="button"
+                onClick={() => setConfirmingDelete(true)}
+                className="flex items-center gap-1.5 rounded bg-danger px-3 py-2 text-sm font-medium text-white hover:bg-danger-hover focus:outline-none focus:ring-2 focus:ring-danger focus:ring-offset-2"
+              >
+                <Trash2 aria-hidden="true" className="h-4 w-4" />
+                Delete task
+              </button>
+            ) : (
+              <span />
+            )}
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded px-2 py-1 text-sm font-medium text-ink-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-brand"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="rounded bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+              >
+                {isEdit ? 'Save changes' : 'Create task'}
+              </button>
             </div>
-          ) : (
-            <footer className="flex items-center justify-between border-t border-line px-5 py-4">
-              {isEdit ? (
-                <button
-                  type="button"
-                  onClick={() => setConfirmingDelete(true)}
-                  className="flex items-center gap-1.5 rounded bg-danger px-3 py-2 text-sm font-medium text-white hover:bg-danger-hover focus:outline-none focus:ring-2 focus:ring-danger focus:ring-offset-2"
-                >
-                  <Trash2 aria-hidden="true" className="h-4 w-4" />
-                  Delete task
-                </button>
-              ) : (
-                <span />
-              )}
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="rounded px-2 py-1 text-sm font-medium text-ink-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-brand"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="rounded bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
-                >
-                  {isEdit ? 'Save changes' : 'Create task'}
-                </button>
-              </div>
-            </footer>
-          )}
-        </form>
-      </div>
-    </div>
+          </footer>
+        )}
+      </form>
+    </Dialog>
   );
 }
