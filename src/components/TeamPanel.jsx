@@ -136,7 +136,7 @@ export default function TeamPanel({ team, tasks, onAdd, onRemove, onClose }) {
                           setConfirmingId(null);
                           onRemove(member.id);
                         }}
-                        className="flex items-center gap-1.5 rounded bg-danger px-3 py-2 text-sm font-medium text-white hover:bg-danger-hover focus:outline-none focus:ring-2 focus:ring-danger focus:ring-offset-2"
+                        className="flex items-center gap-1.5 rounded bg-danger px-3 py-2 text-sm font-medium text-on-accent hover:bg-danger-hover focus:outline-none focus:ring-2 focus:ring-danger focus:ring-offset-2"
                       >
                         <Trash2 aria-hidden="true" className="h-4 w-4" />
                         Remove member
@@ -199,7 +199,7 @@ export default function TeamPanel({ team, tasks, onAdd, onRemove, onClose }) {
         <div className="mt-4 flex justify-end">
           <button
             type="submit"
-            className="flex items-center gap-1.5 rounded bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+            className="flex items-center gap-1.5 rounded bg-brand px-4 py-2 text-sm font-medium text-on-accent hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
           >
             <UserPlus aria-hidden="true" className="h-4 w-4" />
             Add member

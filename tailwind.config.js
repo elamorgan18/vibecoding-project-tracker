@@ -1,20 +1,46 @@
+import plugin from 'tailwindcss/plugin';
+import { THEMES, hexToChannels } from './src/theme/tokens.js';
+
+// Every colour is a CSS variable (values in src/theme/tokens.js), so one class
+// such as `bg-card` works in both themes. `<alpha-value>` keeps opacity
+// modifiers like `ring-brand/30` working.
+const v = (key) => `rgb(var(--c-${key}) / <alpha-value>)`;
+
 // Status colours (DESIGN.md §2.2). `danger` is reused for the overdue due state.
 const success = {
-  DEFAULT: '#16A34A',
-  soft: '#F0FDF4',
-  text: '#15803D',
+  DEFAULT: v('success'),
+  soft: v('success-soft'),
+  text: v('success-text'),
 };
 
 const danger = {
-  DEFAULT: '#DC2626',
-  hover: '#B91C1C',
-  soft: '#FEF2F2',
-  text: '#B91C1C',
+  DEFAULT: v('danger'),
+  hover: v('danger-hover'),
+  soft: v('danger-soft'),
+  text: v('danger-text'),
 };
+
+const avatar = (key) => ({ bg: v(`avatar-${key}-bg`), text: v(`avatar-${key}-text`) });
+
+// The CSS variables: light on :root, dark on .dark (DESIGN.md §2.8).
+const cssVars = (theme) =>
+  Object.fromEntries(Object.entries(theme).map(([key, hex]) => [`--c-${key}`, hexToChannels(hex)]));
+
+const themeVariables = plugin(({ addBase }) => {
+  addBase({
+    ':root': { ...cssVars(THEMES.light), colorScheme: 'light' },
+    // `color-scheme` makes native controls (select menus, scrollbars, date
+    // pickers) follow the theme.
+    '.dark': { ...cssVars(THEMES.dark), colorScheme: 'dark' },
+  });
+});
 
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
+  // Dark mode follows a `dark` class on <html>, set from the saved choice or
+  // the system preference (index.html, useTheme.js).
+  darkMode: 'class',
   theme: {
     extend: {
       // Design tokens from DESIGN.md §2. Base tokens are translated from a
@@ -23,70 +49,81 @@ export default {
       // shade for coloured text (WCAG AA, §2.6).
       colors: {
         brand: {
-          DEFAULT: '#2563EB',
-          hover: '#1D4ED8',
-          soft: '#EFF6FF',
+          DEFAULT: v('brand'),
+          hover: v('brand-hover'),
+          soft: v('brand-soft'),
         },
-        surface: '#F8FAFC',
-        card: '#FFFFFF',
-        'muted-bg': '#F1F5F9',
-        line: '#E2E8F0',
+        surface: v('surface'),
+        card: v('card'),
+        'muted-bg': v('muted-bg'),
+        line: v('line'),
         ink: {
-          DEFAULT: '#020817',
-          soft: '#475569', // captions on muted-bg and tinted backgrounds
+          DEFAULT: v('ink'),
+          soft: v('ink-soft'), // captions on muted-bg and tinted backgrounds
         },
         // Darkened from #64748B (4.55:1 on surface) for contrast margin; now the
         // same value as ink-soft (≥ 6.9:1 on every background it sits on).
-        muted: '#475569',
+        muted: v('muted'),
+        // Modal backdrop (used at 40% / 60% opacity).
+        scrim: v('scrim'),
+        // Text and icons on solid brand / danger / success fills: white in
+        // light mode, near-black in dark mode where those fills are light.
+        'on-accent': v('on-accent'),
 
         // Status: confirmation toasts, deliverable dot, Done accent / delete, errors, overdue
         success,
         danger,
 
         // Avatar colours (DESIGN.md §2.7): soft background + dark initials.
-        // Hues sit ≥ 22° (OKLCH) from every semantic hue; initials ≥ 6.5:1.
+        // Hues sit ≥ 22° (OKLCH) from every semantic hue; initials ≥ 6.5:1
+        // (≥ 5.1:1 on the dimmed dark-mode backgrounds).
         avatar: {
-          teal: { bg: '#91E5CA', text: '#084B3C' },
-          magenta: { bg: '#F8B1DD', text: '#6A1952' },
-          lime: { bg: '#D7F5AB', text: '#3A5006' },
-          cyan: { bg: '#8BD9EA', text: '#074550' },
-          orchid: { bg: '#F1D0FF', text: '#602F72' },
-          olive: { bg: '#D9D27A', text: '#443F03' },
-          aqua: { bg: '#A3F6F6', text: '#005354' },
-          gold: { bg: '#FFDC9E', text: '#5D4304' },
+          teal: avatar('teal'),
+          magenta: avatar('magenta'),
+          lime: avatar('lime'),
+          cyan: avatar('cyan'),
+          orchid: avatar('orchid'),
+          olive: avatar('olive'),
+          aqua: avatar('aqua'),
+          gold: avatar('gold'),
         },
 
         // Task type (M6 tag-style): corner badge + icon
         feature: {
-          DEFAULT: '#7C3AED',
-          soft: '#F5F3FF',
-          text: '#6D28D9',
+          DEFAULT: v('feature'),
+          soft: v('feature-soft'),
+          text: v('feature-text'),
         },
         bug: {
-          DEFAULT: '#E11D48',
-          soft: '#FFF1F2',
-          text: '#BE123C',
+          DEFAULT: v('bug'),
+          soft: v('bug-soft'),
+          text: v('bug-text'),
         },
 
         // Due-date state (M8 due-tint): left border + background tint
         due: {
           calm: {
-            DEFAULT: '#0EA5E9',
-            soft: '#F0F9FF',
-            text: '#0369A1',
+            DEFAULT: v('due-calm'),
+            soft: v('due-calm-soft'),
+            text: v('due-calm-text'),
           },
           warning: {
-            DEFAULT: '#D97706',
-            soft: '#FFFBEB',
-            text: '#B45309',
+            DEFAULT: v('due-warning'),
+            soft: v('due-warning-soft'),
+            text: v('due-warning-text'),
           },
           overdue: danger,
           done: {
-            DEFAULT: '#94A3B8',
-            soft: '#F1F5F9',
-            text: '#475569',
+            DEFAULT: v('due-done'),
+            soft: v('due-done-soft'),
+            text: v('due-done-text'),
           },
         },
+      },
+      // `ring-offset-2` with no colour leaves a gap in the card colour (white
+      // in light mode, as before) instead of Tailwind's fixed white.
+      ringOffsetColor: {
+        DEFAULT: 'rgb(var(--c-card))',
       },
       // Type scale (DESIGN.md §3). Sizes in rem; line-heights unitless so they
       // scale with the text when users enlarge it (Tailwind's defaults are rem).
@@ -117,5 +154,5 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [themeVariables],
 };

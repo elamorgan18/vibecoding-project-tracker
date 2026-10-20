@@ -76,4 +76,7 @@ export const STORAGE_KEYS = {
   projects: 'vibetracker.projects',
   tasks: 'vibetracker.tasks',
   anchors: 'vibetracker.anchors',
+  // 'light' | 'dark' once the user picks one; null = follow the system.
+  // index.html reads this key too, to set the theme before the first paint.
+  theme: 'vibetracker.theme',
 };

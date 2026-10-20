@@ -10,6 +10,17 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    <script>
+      // Set the theme before the page paints, so dark mode doesn't flash
+      // light. Same rule as src/hooks/useTheme.js: the saved choice, else the
+      // system preference.
+      (function () {
+        var saved = null;
+        try { saved = JSON.parse(localStorage.getItem('vibetracker.theme')); } catch (e) {}
+        var dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', dark);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

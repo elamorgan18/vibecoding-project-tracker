@@ -9,6 +9,7 @@ import { todayISO } from './data/dates.js';
 import { moveTask, nextTaskId, reassignTask, removeTask, unassignMember, upsertTask } from './data/tasks.js';
 import { addMember, removeMember, withTeamAvatarColors } from './data/team.js';
 import { useLocalStorage, writeStorage } from './hooks/useLocalStorage.js';
+import { useTheme } from './hooks/useTheme.js';
 import { copyText } from './utils/clipboard.js';
 import AnchorBoard from './components/AnchorBoard.jsx';
 import Board from './components/Board.jsx';
@@ -16,6 +17,7 @@ import TeamMembersStrip from './components/TeamMembersStrip.jsx';
 import DueLegend from './components/DueLegend.jsx';
 import TaskModal from './components/TaskModal.jsx';
 import TeamPanel from './components/TeamPanel.jsx';
+import ThemeToggle from './components/ThemeToggle.jsx';
 import Toast from './components/Toast.jsx';
 
 /**
@@ -25,6 +27,8 @@ import Toast from './components/Toast.jsx';
  *   src/data/seed.js            mock team, project and tasks for first load
  *   src/data/tasks.js, team.js, anchors.js  pure update helpers
  *   src/hooks/useLocalStorage.js
+ *   src/theme/tokens.js         light + dark colour tokens (read by tailwind.config.js)
+ *   src/hooks/useTheme.js       light / dark mode (ThemeToggle in the header)
  *   src/components/             AnchorBoard → AnchorCard, TeamMembersStrip, Board → Column → TaskCard,
  *                               TaskModal, TeamPanel, Toast (+ shared Dialog,
  *                               FormField, Avatar, TypeBadge)
@@ -37,6 +41,7 @@ export default function App() {
   const [tasks, setTasks, tasksError] = useLocalStorage(STORAGE_KEYS.tasks, SEED_TASKS);
   const [anchors, setAnchors, anchorsError] = useLocalStorage(STORAGE_KEYS.anchors, SEED_ANCHORS);
   const storageError = tasksError ?? teamsError ?? anchorsError;
+  const [isDark, toggleTheme] = useTheme();
 
   // Members saved before avatar colours existed get one (once, then stored).
   useEffect(() => {
@@ -145,6 +150,7 @@ export default function App() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
           <button
             type="button"
             onClick={() => setTeamOpen(true)}
@@ -157,7 +163,7 @@ export default function App() {
           <button
             type="button"
             onClick={() => openModal(null)}
-            className="flex items-center gap-1.5 rounded bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+            className="flex items-center gap-1.5 rounded bg-brand px-4 py-2 text-sm font-medium text-on-accent hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
           >
             <Plus aria-hidden="true" className="h-4 w-4" />
             New task

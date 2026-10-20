@@ -30,8 +30,8 @@ export const TYPE_META = {
 
 /**
  * Small pill with the type's icon and label, used on cards and in the modal.
- * It sits on a type-tinted surface, so the pill itself is white to stay
- * visible against the tint.
+ * It sits on a type-tinted surface, so the pill itself is `card` (white in
+ * light mode) to stay visible against the tint.
  */
 export default function TypeBadge({ type }) {
   const { label, Icon, text, icon } = TYPE_META[type];

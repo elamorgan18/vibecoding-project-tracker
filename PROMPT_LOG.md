@@ -360,3 +360,15 @@ Fill in the factual sections of docs/decisions/M12-secret-sauce.md if this is my
 ````
 
 **Summary:** Added `@dnd-kit/core` drag and drop between columns: mouse (6px threshold), touch (250ms hold) and keyboard (Space / arrows jump columns / Escape) with screen-reader announcements, a `brand` column highlight and a lifted `DragOverlay` card (`Board.jsx`, `Column.jsx`, `TaskCard.jsx`, `moveTask()` in `tasks.js`, `App.jsx`). Updated `DESIGN.md` §4/§5/§7 and filled in `docs/decisions/M12-secret-sauce.md`. Tested in headless Edge (36/36 passed) and `npm run build` passes.
+
+### 2026-10-20 14:36 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Add a dark mode toggle button in the header (Tailwind `darkMode: 'class'`). Default to the user's system preference; save their choice to localStorage. Create dark versions of all tokens (surface, card, ink, muted, line, brand, feature/bug tints, due-date states, success/danger, avatar colours) that keep the same meanings and pass WCAG AA contrast. The button needs an icon + accessible label ("Switch to dark mode"/"Switch to light mode"), visible focus ring, and aria-pressed. List any contrast failures. Update DESIGN.md.
+````
+
+**Summary:** Added dark mode. Light and dark values for every colour token are in the new `src/theme/tokens.js`, and `tailwind.config.js` (`darkMode: 'class'`) turns them into CSS variables, so existing classes switch theme without `dark:` variants. Added two tokens, `on-accent` and `scrim`. The new `useTheme.js` and `ThemeToggle.jsx` handle the toggle: system default, a choice saved under `vibetracker.theme`, moon/sun icon, label, `aria-pressed` and a focus ring. An `index.html` script sets the theme before the first paint. Also changed `App.jsx`, `index.css`, `Dialog.jsx` and `model.js`, replaced `text-white` with `text-on-accent`, and added DESIGN.md §2.8 with dark tokens, avatars, a contrast table and failures. No text pair fails in either theme. Only the decorative `line` border fails (1.41:1 dark, 1.23:1 light). Tested in headless Edge with axe-core (21/21 checks passed) and re-ran the M12 drag-and-drop tests (36/36 passed).

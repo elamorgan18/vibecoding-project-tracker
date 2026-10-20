@@ -13,7 +13,7 @@ function AnchorStatus({ linked }) {
       {linked ? (
         <>
           <span aria-hidden="true" className="flex h-4 w-4 items-center justify-center rounded-full bg-success">
-            <Check className="h-3 w-3 text-white" strokeWidth={3} />
+            <Check className="h-3 w-3 text-on-accent" strokeWidth={3} />
           </span>
           <span className="text-success-text">Linked</span>
         </>

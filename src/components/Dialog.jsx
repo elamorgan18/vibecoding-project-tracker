@@ -50,7 +50,7 @@ export default function Dialog({ labelledBy, onClose, initialFocusRef, className
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-ink/40" onMouseDown={closeOnBackdrop}>
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-scrim/40 dark:bg-scrim/60" onMouseDown={closeOnBackdrop}>
       <div className="flex min-h-full items-start justify-center p-4 sm:items-center sm:py-8" onMouseDown={closeOnBackdrop}>
         <div
           ref={dialogRef}
