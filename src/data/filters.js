@@ -13,13 +13,23 @@ import { AI_TOOLS } from './context.js';
 /** Stands in for `assignee: null` in the Team member filter. */
 export const UNASSIGNED = 'unassigned';
 
-/** Due date filter options, in menu order. */
+/** Type filter options, in menu order. Ids match `Task.type`. */
+export const TYPE_FILTERS = [
+  { id: 'feature', label: 'Feature' },
+  { id: 'bug', label: 'Bug' },
+];
+
+/**
+ * Due date filter options, in menu order. The menu doubles as the due-date
+ * key, so each option names the card colour it matches (`state`, a DUE_META
+ * key in DueChip.jsx; null = no due chip) and says what it means.
+ */
 export const DUE_FILTERS = [
-  { id: 'overdue', label: 'Overdue' },
-  { id: 'due-24h', label: 'Due within 24h' },
-  { id: 'due-later', label: 'Due in more than 2 days' },
-  { id: 'done', label: 'Done' },
-  { id: 'no-date', label: 'No due date' },
+  { id: 'due-later', label: 'Calm', description: 'More than 2 days away', state: 'calm' },
+  { id: 'due-24h', label: 'Due soon', description: 'Due today or tomorrow', state: 'warning' },
+  { id: 'overdue', label: 'Overdue', description: 'Past the due date', state: 'overdue' },
+  { id: 'done', label: 'Done', description: 'Completed tasks', state: 'done' },
+  { id: 'no-date', label: 'No due date', description: 'Not done and no date set', state: null },
 ];
 
 /** Stands in for `contextTool: null` in the AI tool filter. */
@@ -32,10 +42,10 @@ export const AI_TOOL_FILTERS = [
 ];
 
 /**
- * @typedef {{ members: string[], due: string[], tools: string[] }} Filters
- *   member ids (or UNASSIGNED), DUE_FILTERS ids and AI_TOOL_FILTERS ids
+ * @typedef {{ members: string[], types: string[], due: string[], tools: string[] }} Filters
+ *   member ids (or UNASSIGNED), TYPE_FILTERS ids, DUE_FILTERS ids and AI_TOOL_FILTERS ids
  */
-export const NO_FILTERS = { members: [], due: [], tools: [] };
+export const NO_FILTERS = { members: [], types: [], due: [], tools: [] };
 
 /**
  * Which due date option a task falls under. Every task gets at most one:
@@ -58,13 +68,14 @@ export function dueFilterId(task, today = todayISO()) {
 }
 
 export const hasFilters = (filters) =>
-  filters.members.length > 0 || filters.due.length > 0 || filters.tools.length > 0;
+  filters.members.length > 0 || filters.types.length > 0 || filters.due.length > 0 || filters.tools.length > 0;
 
 export function matchesFilters(task, filters, today = todayISO()) {
   const memberOk = filters.members.length === 0 || filters.members.includes(task.assignee ?? UNASSIGNED);
+  const typeOk = filters.types.length === 0 || filters.types.includes(task.type);
   const dueOk = filters.due.length === 0 || filters.due.includes(dueFilterId(task, today));
   const toolOk = filters.tools.length === 0 || filters.tools.includes(task.contextTool ?? NO_AI_TOOL);
-  return memberOk && dueOk && toolOk;
+  return memberOk && typeOk && dueOk && toolOk;
 }
 
 /** `values` with `value` added, or removed if it was already there. */

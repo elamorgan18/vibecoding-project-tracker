@@ -1,18 +1,30 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { ChevronDown, Filter, X } from 'lucide-react';
-import { AI_TOOL_FILTERS, DUE_FILTERS, NO_AI_TOOL, NO_FILTERS, UNASSIGNED, hasFilters, toggleValue } from '../data/filters.js';
+import { CalendarOff, ChevronDown, Filter, X } from 'lucide-react';
+import {
+  AI_TOOL_FILTERS,
+  DUE_FILTERS,
+  NO_AI_TOOL,
+  NO_FILTERS,
+  TYPE_FILTERS,
+  UNASSIGNED,
+  hasFilters,
+  toggleValue,
+} from '../data/filters.js';
 import Avatar from './Avatar.jsx';
+import { DUE_META } from './DueChip.jsx';
+import { TYPE_META } from './TypeBadge.jsx';
 
 const FOCUS = 'focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-card';
 
 /**
- * Filter bar above the board: "Team member", "Due date" and "AI tool" menus, the
+ * Filter bar above the board: "Team member", "Type", "Due date" and "AI tool" menus, the
  * active filters as removable chips, "Clear filters", and a result count in
  * an aria-live region so screen readers hear it change.
  *
  * Each menu is a disclosure button (aria-expanded) opening a fieldset of
  * native checkboxes: Tab moves through them, Space ticks, Escape closes and
- * returns focus to the button. Removing a chip moves focus to the next chip
+ * returns focus to the button. The Due date menu is also the key to the card
+ * colours: each option shows its swatch, icon, name and what it means. Removing a chip moves focus to the next chip
  * (or the "Team member" button when none are left), so focus is never lost.
  */
 export default function FilterBar({ filters, onChange, members, shownCount, totalCount }) {
@@ -32,6 +44,12 @@ export default function FilterBar({ filters, onChange, members, shownCount, tota
       id,
       groupLabel: 'Member',
       label: memberOptions.find((o) => o.id === id)?.label ?? id,
+    })),
+    ...filters.types.map((id) => ({
+      group: 'types',
+      id,
+      groupLabel: 'Type',
+      label: TYPE_FILTERS.find((o) => o.id === id).label,
     })),
     ...filters.due.map((id) => ({
       group: 'due',
@@ -89,11 +107,28 @@ export default function FilterBar({ filters, onChange, members, shownCount, tota
         />
 
         <FilterMenu
+          label="Type"
+          options={TYPE_FILTERS}
+          selected={filters.types}
+          onToggle={(id) => onChange({ ...filters, types: toggleValue(filters.types, id) })}
+          renderOption={(option) => {
+            const { Icon, icon, text } = TYPE_META[option.id];
+            return (
+              <>
+                <Icon aria-hidden="true" className={`h-4 w-4 shrink-0 ${icon}`} />
+                <span className={`font-medium ${text}`}>{option.label}</span>
+              </>
+            );
+          }}
+        />
+
+        <FilterMenu
           label="Due date"
           options={DUE_FILTERS}
           selected={filters.due}
           onToggle={(id) => onChange({ ...filters, due: toggleValue(filters.due, id) })}
-          renderOption={(option) => <span className="text-ink">{option.label}</span>}
+          panelWidth="w-72"
+          renderOption={(option) => <DueOption option={option} />}
         />
 
         <FilterMenu
@@ -143,8 +178,33 @@ export default function FilterBar({ filters, onChange, members, shownCount, tota
   );
 }
 
+/**
+ * One Due date option, doubling as the key to the card colours: a swatch in
+ * the card's left-border colour, the chip's icon, the name and a short
+ * description. "No due date" has no colour on cards, so its swatch is a
+ * dashed outline.
+ */
+function DueOption({ option }) {
+  const meta = option.state ? DUE_META[option.state] : null;
+  const Icon = meta ? meta.Icon : CalendarOff;
+
+  return (
+    <>
+      <span
+        aria-hidden="true"
+        className={`h-4 w-1.5 shrink-0 rounded-sm ${meta ? meta.swatch : 'border border-dashed border-ink-soft'}`}
+      />
+      <Icon aria-hidden="true" className={`h-4 w-4 shrink-0 ${meta ? meta.text : 'text-ink-soft'}`} />
+      <span className="flex flex-col leading-tight">
+        <span className="font-medium text-ink">{option.label}</span>
+        <span className="text-xs text-ink-soft">{option.description}</span>
+      </span>
+    </>
+  );
+}
+
 /** A button that opens a popover of checkboxes (one filter group). */
-function FilterMenu({ label, options, selected, onToggle, renderOption, buttonRef }) {
+function FilterMenu({ label, options, selected, onToggle, renderOption, buttonRef, panelWidth = 'w-64' }) {
   const [open, setOpen] = useState(false);
   const wrapper = useRef(null);
   const ownButton = useRef(null);
@@ -201,7 +261,7 @@ function FilterMenu({ label, options, selected, onToggle, renderOption, buttonRe
       <div
         id={panelId}
         hidden={!open}
-        className="absolute left-0 top-full z-30 mt-1 w-64 rounded border border-line bg-card p-2 shadow-lg"
+        className={`absolute left-0 top-full z-30 mt-1 ${panelWidth} max-w-[calc(100vw-2rem)] rounded border border-line bg-card p-2 shadow-lg`}
       >
         <fieldset>
           <legend className="sr-only">{label}</legend>

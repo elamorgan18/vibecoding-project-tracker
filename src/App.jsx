@@ -15,7 +15,6 @@ import { copyText } from './utils/clipboard.js';
 import AnchorBoard from './components/AnchorBoard.jsx';
 import Board from './components/Board.jsx';
 import TeamMembersStrip from './components/TeamMembersStrip.jsx';
-import DueLegend from './components/DueLegend.jsx';
 import FilterBar from './components/FilterBar.jsx';
 import TaskModal from './components/TaskModal.jsx';
 import TeamPanel from './components/TeamPanel.jsx';
@@ -207,8 +206,6 @@ export default function App() {
           <AnchorBoard anchors={projectAnchors(anchors, project.id)} onSave={handleSaveAnchor} />
 
           <TeamMembersStrip members={team.members} tasks={projectTasks} onOpenTask={openModal} />
-
-          <DueLegend />
 
           <FilterBar
             filters={filters}

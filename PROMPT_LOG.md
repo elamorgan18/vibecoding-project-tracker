@@ -455,3 +455,18 @@ Add the live link https://vibecoding-project-tracker-ela-morg.vercel.app/ to REA
 ````
 
 **Summary:** Added a "Live demo" section to `README.md` (above "AI tools used") with the Vercel link and a note that no login or registration is needed. Started the `## M13 – pitch-ready` heading in `PROMPT_LOG.md`.
+
+### 2026-10-20 16:19 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Two tweaks:
+1. Add a "Type" filter to the filter bar: Feature / Bug (multi-select), each option showing its icon and colour. It works like the other filters (AND with other groups, removable chip, included in "Clear filters" and the result count).
+2. Remove the due-date legend from the page and move it into the Due date filter dropdown instead. Each option shows its colour swatch, icon, name and a short description, e.g. "Calm: more than 2 days away", "Due soon: under 24 hours", "Overdue: past the due date", "Done: completed tasks", "No due date". Keep the same colours as the card borders and chips, and keep text labels so it doesn't rely on colour alone.
+Both must be keyboard accessible and work in dark mode. Update DESIGN.md and log this in PROMPT_LOG.md.
+````
+
+**Summary:** Added a "Type" menu (Feature / Bug with their icons and type colours) to the filter bar, with "Type:" chips, Clear filters and the result count covering it (`src/data/filters.js` gains `TYPE_FILTERS` and a `types` group; `src/components/FilterBar.jsx`). Deleted `src/components/DueLegend.jsx` and its use in `src/App.jsx`; the Due date menu now shows a swatch, icon, name and description per option (Calm, Due soon, Overdue, Done, No due date), using new `swatch` / `text` classes in `DUE_META` (`src/components/DueChip.jsx`). Updated `DESIGN.md` §2.4, §4 filter bar and the microcopy table. `npm run build` passes.
