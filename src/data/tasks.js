@@ -12,6 +12,16 @@ export function reassignTask(tasks, id, memberId) {
   return tasks.map((t) => (t.id === id ? { ...t, assignee: memberId } : t));
 }
 
+/**
+ * Move a task to another column (M12 drag and drop). It goes to the end of the
+ * list so it lands at the bottom of its new column. Same column: no change.
+ */
+export function moveTask(tasks, id, status) {
+  const task = tasks.find((t) => t.id === id);
+  if (!task || task.status === status) return tasks;
+  return [...tasks.filter((t) => t.id !== id), { ...task, status }];
+}
+
 /** Unassign every task owned by a member (used when they leave the team). */
 export function unassignMember(tasks, memberId) {
   return tasks.map((t) => (t.assignee === memberId ? { ...t, assignee: null } : t));

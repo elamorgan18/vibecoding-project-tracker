@@ -203,7 +203,7 @@ Rules:
 
 ## 4. Component principles
 
-Cards are tinted by type (`feature-soft` or `bug-soft`) with a 1px border in the type colour, the 6 px theme radius, a white icon + label badge in the top-right corner, and a soft shadow that only appears on hover. They gain a thicker coloured left border and a due-date chip only when their due date has something to say. Buttons are solid `brand` with white text, `rounded`, and generous padding; secondary actions are plain text links, so there is only ever one loud button on screen, and the only red button is "Delete task" with its trash icon. The modal is centred, `max-w-lg`, on a `ink` backdrop at 40% opacity, with the Context field set in JetBrains Mono so prompts read like the code they produce, and form errors appear inline under the field in `danger-text` with an alert icon. Columns sit on `muted-bg`. Empty columns use a dashed `line` border with a short `ink-soft` line of encouragement, and status changes go through a dropdown (no drag-and-drop), so moving a task is always one deliberate click.
+Cards are tinted by type (`feature-soft` or `bug-soft`) with a 1px border in the type colour, the 6 px theme radius, a white icon + label badge in the top-right corner, and a soft shadow that only appears on hover. They gain a thicker coloured left border and a due-date chip only when their due date has something to say. Buttons are solid `brand` with white text, `rounded`, and generous padding; secondary actions are plain text links, so there is only ever one loud button on screen, and the only red button is "Delete task" with its trash icon. The modal is centred, `max-w-lg`, on a `ink` backdrop at 40% opacity, with the Context field set in JetBrains Mono so prompts read like the code they produce, and form errors appear inline under the field in `danger-text` with an alert icon. Columns sit on `muted-bg`. Empty columns use a dashed `line` border with a short `ink-soft` line of encouragement, and status changes go through either the dropdown in the modal or drag and drop between columns (M12). While a card is dragged, the card left behind fades to 40% opacity, a lifted copy with `shadow-xl` follows the pointer, and the column under it gets a 2px `brand` ring on `brand-soft`. The same move works from the keyboard (Space, arrow keys, Space) and by press-and-hold on touch screens.
 
 ## 5. Voice / microcopy
 
@@ -213,6 +213,8 @@ Calm, short, second person. No exclamation marks unless something is actually wr
 |---|---|
 | "+" button label | "+ New task" |
 | Empty column placeholder | "Nothing here. Enjoy the quiet." |
+| Empty column while a card is dragged over it (M12) | "Drop it here." |
+| Drag and drop screen-reader announcements (M12) | "Picked up Task {id}, {title}, in {column}." / "Over {column}." / "Task {id}, {title}, moved to {column}." / "Move cancelled. Task {id}, {title}, stays in {column}." |
 | Toast after "Copy Context" (M10, success) | "Copied to clipboard!" (copy failed, danger: "Couldn't copy. Your browser blocked the clipboard.") |
 | Confirm-delete message (danger) | "Delete this task and its prompt history? This can't be undone." |
 | Handoff toast (M7 `task-owner`, success) | "Handed to {name}. It's on their board now." |
@@ -239,7 +241,7 @@ Calm, short, second person. No exclamation marks unless something is actually wr
 
 - A dark mode toggle. Light mode only.
 - Multiple themes. One brand, applied consistently.
-- Animations beyond a 200 ms fade on toast notifications.
+- Animations beyond a 200 ms fade on toast notifications and the M12 drag and drop motion (the lifted card's tilt and the drop animation), which are both turned off when the user asks for reduced motion.
 - A custom icon set. Use [Lucide icons](https://lucide.dev) if needed.
 
 ---

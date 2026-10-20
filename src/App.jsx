@@ -6,7 +6,7 @@ import { STORAGE_KEYS } from './data/model.js';
 import { SEED_TEAMS, SEED_PROJECTS, SEED_TASKS, SEED_ANCHORS } from './data/seed.js';
 import { projectAnchors, setAnchorUrl } from './data/anchors.js';
 import { todayISO } from './data/dates.js';
-import { nextTaskId, reassignTask, removeTask, unassignMember, upsertTask } from './data/tasks.js';
+import { moveTask, nextTaskId, reassignTask, removeTask, unassignMember, upsertTask } from './data/tasks.js';
 import { addMember, removeMember, withTeamAvatarColors } from './data/team.js';
 import { useLocalStorage, writeStorage } from './hooks/useLocalStorage.js';
 import { copyText } from './utils/clipboard.js';
@@ -111,6 +111,10 @@ export default function App() {
     showToast(`Handed to ${member.name}. It's on their board now.`);
   }
 
+  function handleMoveTask(taskId, status) {
+    setTasks((all) => moveTask(all, taskId, status));
+  }
+
   function handleAddMember(values) {
     const result = addMember(teams, team.id, values);
     setTeams(result.teams);
@@ -183,6 +187,7 @@ export default function App() {
         members={team.members}
         onOpenTask={openModal}
         onCopyContext={handleCopyContext}
+        onMoveTask={handleMoveTask}
       />
 
       {modal && (

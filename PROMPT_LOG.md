@@ -339,3 +339,24 @@ M11: Pin four cards above the board: Presentation, Demo, Report, Documentation. 
 ````
 
 **Summary:** Added a "Deliverables" section above the board (`AnchorBoard.jsx`, `AnchorCard.jsx`). It has four cards with an icon + text status, URL validation that accepts only http(s) links (`src/data/anchors.js`), a 14px inline error, a new-tab link with Change/Remove, and a 1/2/4-column grid. The anchors are stored in localStorage with a `projectId` (`App.jsx`, `model.js`, `seed.js`). Updated the `DESIGN.md` microcopy and filled in `docs/decisions/M11-project-deliverables.md`. Tested in headless Edge (36/36 passed, 320–1440px) and `npm run build` passes.
+
+## M12 – secret-sauce
+
+### 2026-10-20 14:26 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Add drag-and-drop for task cards between the four columns (To Do, In Progress, Review, Done). Use @dnd-kit (it supports keyboard and screen readers) rather than writing raw HTML5 drag events. Requirements:
+- Dropping a card in a column updates its status and persists to localStorage.
+- Show a clear drop target highlight on the column being dragged over, and a lifted/shadow style on the dragged card.
+- Keyboard support: focus a card, press Space to pick it up, arrow keys to move between columns, Space to drop, Escape to cancel, with screen-reader announcements (e.g. "Task moved to Review").
+- Clicking a card still opens the modal, and the Copy Context button still works without starting a drag (use a small drag distance threshold).
+- Works on touch screens.
+- The due-date state, type tint and avatar colours update correctly after a move (e.g. moving to Done makes it neutral).
+Fill in the factual sections of docs/decisions/M12-secret-sauce.md if this is my secret sauce feature.
+````
+
+**Summary:** Added `@dnd-kit/core` drag and drop between columns: mouse (6px threshold), touch (250ms hold) and keyboard (Space / arrows jump columns / Escape) with screen-reader announcements, a `brand` column highlight and a lifted `DragOverlay` card (`Board.jsx`, `Column.jsx`, `TaskCard.jsx`, `moveTask()` in `tasks.js`, `App.jsx`). Updated `DESIGN.md` §4/§5/§7 and filled in `docs/decisions/M12-secret-sauce.md`. Tested in headless Edge (36/36 passed) and `npm run build` passes.
