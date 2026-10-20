@@ -49,9 +49,9 @@ export const SEED_TEAMS = [
     id: 'team-1',
     name: 'Demo Team',
     members: [
-      { id: 'member-1', name: 'Priya Shah', email: 'priya.shah@example.com', githubUsername: 'priya-codes' },
-      { id: 'member-2', name: 'Tom Okafor', email: 'tom.okafor@example.com', githubUsername: 'tokafor-dev' },
-      { id: 'member-3', name: 'Sam Rivera', email: 'sam.rivera@example.com', githubUsername: 'samrivera' },
+      { id: 'member-1', name: 'Priya Shah', email: 'priya.shah@example.com', githubUsername: 'priya-codes', avatarColor: 'teal' },
+      { id: 'member-2', name: 'Tom Okafor', email: 'tom.okafor@example.com', githubUsername: 'tokafor-dev', avatarColor: 'magenta' },
+      { id: 'member-3', name: 'Sam Rivera', email: 'sam.rivera@example.com', githubUsername: 'samrivera', avatarColor: 'lime' },
     ],
   },
 ];

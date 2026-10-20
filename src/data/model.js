@@ -12,6 +12,8 @@
  * @property {string} name
  * @property {string} email
  * @property {string} githubUsername
+ * @property {'teal'|'magenta'|'lime'|'cyan'|'orchid'|'olive'|'aqua'|'gold'} avatarColor
+ *   set once when the member is created (see avatarColors.js)
  */
 
 /**

@@ -277,3 +277,51 @@ Accessibility audit of typography. Don't change anything yet; report back in a t
 ````
 
 **Summary:** Audit only; no app or design files changed. Inventoried every text style in `src/components/*.jsx`, `src/App.jsx`, `src/index.css` and `tailwind.config.js` and computed WCAG contrast for each pair. Reported findings and suggested fixes in the chat. Only `PROMPT_LOG.md` changed (this entry).
+
+### 2026-10-20 13:45 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Apply typography fixes from the audit:
+1. Body/reading text to 16px (1rem) with line-height 1.5: all inputs, selects, date fields, placeholders, description, Context textarea (JetBrains Mono, 1rem), AI problems textarea, Markdown preview body, delete/remove confirmations, save-failed alerts and toasts.
+2. Field error messages and the copy-failed message to 14px (0.875rem) with line-height 1.4.
+3. Darken the muted text token to #475569 and re-check all muted-text contrast pairs.
+4. Use unitless line-heights (1.5 body, 1.4 small text) instead of rem-based line-heights, so spacing scales when users enlarge text.
+5. Remove the unused text-[11px] avatar size from Avatar.jsx.
+Keep 12px for compact metadata (IDs, count pills, badges, due chips) and 14px for card titles and names.
+Update DESIGN.md §3 to match (body text 16px), check the board and modal still lay out well, and record the changes in docs/decisions/M3-design.md (factual sections only).
+````
+
+**Summary:** Changed `tailwind.config.js` (`muted` #475569; `fontSize` with unitless line-heights). Body text is now 16px in `FormField.jsx` (inputs), `ContextSection.jsx`, `MarkdownPreview.jsx`, `TaskModal.jsx`, `TeamPanel.jsx`, `Toast.jsx` and `App.jsx`, and errors are 14px. Removed the 11px avatar size (`Avatar.jsx`). Updated `DESIGN.md` §2.1/§2.5/§2.6/§3. Checked layout in headless Edge at 1440/1280/390 px (no overflow or clipping), ran jsdom (155/155 passed), and recorded the changes in `docs/decisions/M3-design.md`.
+
+## M7 – task-owner (update: avatar colours)
+
+### 2026-10-20 13:53 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Give each team member a distinct avatar colour. Create a fixed palette of 8 avatar colour pairs (soft background + dark text for the initials), choosing hues that are clearly different from each other and do NOT overlap with our semantic colours (feature, bug, due-date states, success, danger, brand/selection ring). Store the colour on the member when they're created (assign the next unused colour, cycling if there are more than 8), so each person keeps the same colour after reloads, and removing a member doesn't change anyone else's colour. Give existing mock members colours too. Use the member's colour everywhere their avatar appears: cards, Team members strip, team panel, modal owner box and hand-off dropdown. Keep initials always visible so identity never relies on colour alone. Check every pair meets WCAG AA contrast (4.5:1) and list the ratios. Add the avatar palette to DESIGN.md and tailwind.config.js, and record the change in docs/decisions/M7-task-owner.md (factual sections only).
+````
+
+**Summary:** Chose 8 OKLCH-spaced avatar colour pairs (contrast 6.58–7.53:1, at least 22° from semantic hues) and added them to `tailwind.config.js` and `DESIGN.md` §2.7. Added `src/data/avatarColors.js` (next-unused / cycling assignment) and `Member.avatarColor` stored on create (`team.js`), with seed colours and an on-load fill-in for older members (`App.jsx`). `Avatar.jsx` uses the member colour, and the new `HandOffMenu.jsx` listbox replaces the native select so options can show avatars. Tested in jsdom (174/174 passed) and headless Edge screenshots, and recorded the change in `docs/decisions/M7-task-owner.md`.
+
+### 2026-10-20 14:04 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Bug: all member avatars render white instead of their assigned colours. Check two likely causes and fix both:
+1. Tailwind purging dynamic class names: if avatar classes are built with template strings (e.g. `bg-${color}`), Tailwind won't generate them. Use a lookup of complete, literal class names, or apply the colours with inline styles from the palette hex values.
+2. Old localStorage data: members saved before this change have no colour. Add a migration on load that assigns a colour to any member missing one (in order, using the same next-unused logic) and saves it back, without touching other data.
+Tell me which cause it was. Then confirm the colours appear on cards, the Team members strip, the team panel and the modal.
+````
+
+**Summary:** No code changes. Neither cause applied: `Avatar.jsx` already uses literal class names, and `App.jsx`/`team.js` already migrate members without a colour. The real cause was two Vite dev servers (ports 5173/5174) started before the avatar colours were added to `tailwind.config.js`; they kept serving CSS with no `bg-avatar-*` classes. A fresh dev server serves all 8 classes. A headless Edge test with colourless old data showed correct colours on cards, the Team members strip, the team panel and the modal, and confirmed tasks/projects were unchanged.

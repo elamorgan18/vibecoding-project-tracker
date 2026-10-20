@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AlertTriangle, Plus, Users } from 'lucide-react';
 import { buildBriefing } from './data/briefing.js';
 import { contextChanged, contextValues, NEW_TASK_CONTEXT } from './data/context.js';
@@ -6,7 +6,7 @@ import { STORAGE_KEYS } from './data/model.js';
 import { SEED_TEAMS, SEED_PROJECTS, SEED_TASKS } from './data/seed.js';
 import { todayISO } from './data/dates.js';
 import { nextTaskId, reassignTask, removeTask, unassignMember, upsertTask } from './data/tasks.js';
-import { addMember, removeMember } from './data/team.js';
+import { addMember, removeMember, withTeamAvatarColors } from './data/team.js';
 import { useLocalStorage, writeStorage } from './hooks/useLocalStorage.js';
 import { copyText } from './utils/clipboard.js';
 import Board from './components/Board.jsx';
@@ -34,6 +34,12 @@ export default function App() {
   const [projects] = useLocalStorage(STORAGE_KEYS.projects, SEED_PROJECTS);
   const [tasks, setTasks, tasksError] = useLocalStorage(STORAGE_KEYS.tasks, SEED_TASKS);
   const storageError = tasksError ?? teamsError;
+
+  // Members saved before avatar colours existed get one (once, then stored).
+  useEffect(() => {
+    const colored = withTeamAvatarColors(teams);
+    if (colored !== teams) setTeams(colored);
+  }, [teams]);
 
   // null = closed, { task: null } = create, { task } = edit.
   const [modal, setModal] = useState(null);
@@ -152,8 +158,8 @@ export default function App() {
       </header>
 
       {storageError && (
-        <div role="alert" className="mb-6 flex items-start gap-2 rounded border border-danger bg-danger-soft p-3 text-sm text-ink">
-          <AlertTriangle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-danger" />
+        <div role="alert" className="mb-6 flex items-start gap-2 rounded border border-danger bg-danger-soft p-3 text-base text-ink">
+          <AlertTriangle aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-danger" />
           <p>
             <span className="font-semibold text-danger-text">Your latest changes aren't saved. </span>
             {storageError} They'll be lost if you close or reload this page. Free up space (for example, delete old

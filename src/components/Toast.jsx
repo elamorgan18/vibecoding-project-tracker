@@ -31,7 +31,7 @@ export default function Toast({ toast, onDismiss }) {
       {toast && (
         <div
           key={toast.id}
-          className={`pointer-events-auto flex animate-toast-in items-center gap-2 rounded border py-3 pl-4 pr-2 text-sm text-ink shadow-lg motion-reduce:animate-none ${tone.box}`}
+          className={`pointer-events-auto flex animate-toast-in items-center gap-2 rounded border py-3 pl-4 pr-2 text-base text-ink shadow-lg motion-reduce:animate-none ${tone.box}`}
         >
           <tone.Icon aria-hidden="true" className={`h-4 w-4 shrink-0 ${tone.icon}`} />
           <span>{toast.message}</span>

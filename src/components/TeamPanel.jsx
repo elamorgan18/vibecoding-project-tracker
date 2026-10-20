@@ -115,8 +115,8 @@ export default function TeamPanel({ team, tasks, onAdd, onRemove, onClose }) {
                 </div>
                 {confirming && (
                   <div className="flex flex-col gap-3 bg-danger-soft px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="flex items-start gap-2 text-sm text-ink">
-                      <AlertTriangle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-danger" />
+                    <p className="flex items-start gap-2 text-base text-ink">
+                      <AlertTriangle aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-danger" />
                       {count > 0
                         ? `Remove ${member.name} from the team? Their ${plural(count)} will become unassigned.`
                         : `Remove ${member.name} from the team?`}

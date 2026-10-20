@@ -123,7 +123,7 @@ export default function ContextSection({ values, onChange, updatedAt, dirty }) {
             onChange={(e) => onChange('context', e.target.value)}
             spellCheck={false}
             aria-describedby="task-context-updated task-context-copy-status"
-            className={`${inputClass} block min-h-[10rem] max-h-[70vh] resize-y overflow-y-auto border-line font-mono text-[0.8125rem] leading-relaxed`}
+            className={`${inputClass} block min-h-[10rem] max-h-[70vh] resize-y overflow-y-auto border-line font-mono`}
           />
           {showPreview && (
             <div
@@ -136,7 +136,7 @@ export default function ContextSection({ values, onChange, updatedAt, dirty }) {
           )}
         </div>
 
-        <p id="task-context-copy-status" role="status" aria-live="polite" className="mt-1 text-xs">
+        <p id="task-context-copy-status" role="status" aria-live="polite" className="mt-1 text-sm">
           {copyState === 'copied' && <span className="sr-only">Copied! The context is on your clipboard.</span>}
           {copyState === 'failed' && (
             <span className="text-danger-text">Couldn't copy. Select the text and copy it manually.</span>

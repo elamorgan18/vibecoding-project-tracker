@@ -40,7 +40,7 @@ Every hex below is a Tailwind token (see §2.6 for class names). Each meaning co
 | `line` | `#E2E8F0` | Card borders, dividers, input borders |
 | `ink` | `#020817` | Body text, card titles |
 | `ink-soft` | `#475569` | Captions and dates **on `muted-bg` and tinted backgrounds** (my addition, see §2.5) |
-| `muted` | `#64748B` | Captions, dates, counts on `card` / `surface` only |
+| `muted` | `#475569` | Captions, dates, counts, placeholders. Darkened from `#64748B` in the typography fixes; now the same value as `ink-soft` and AA on every background (≥ 6.9:1) |
 
 **Radius:** `0.375rem` (6 px). This is Tailwind's `rounded` (the default is overridden in config) and `rounded-md`. Use it for cards, buttons, inputs, badges and the modal.
 
@@ -72,7 +72,7 @@ How each one is shown. Every use always pairs the colour with an icon **and** te
 - **Card:** the whole card background is the type's `-soft` tint, with a thin (1px) border in the base type colour.
 - **Corner badge:** the top-right corner always shows the type's icon and label ("Feature" / "Bug") in a white pill. Type never relies on colour alone.
 - **Modal:** the modal header uses the same tint, plus the same badge.
-- **Captions on tinted cards** (task ID, assignee) use `ink-soft`, not `muted`, because `muted` fails AA on both tints (§2.6).
+- **Captions on tinted cards** (task ID, assignee) use `ink-soft` (6.91 / 6.90:1). Since `muted` was darkened to the same `#475569`, either token now passes AA on both tints (§2.6).
 
 Feature is **violet** and bug is **rose**: not a red/green pair, and violet is clearly separate from the blue brand colour. `feature` already passes AA as text (5.20:1 on its tint). `feature-text` exists only to match the other badges.
 
@@ -98,7 +98,7 @@ Days are counted in whole calendar days from today (local time); due dates have 
 - **Success and danger mean one thing each.** Green only ever means "done / confirmed". Red (`danger`) only ever means "destructive, wrong or late".
 - **Never colour alone.** Every coloured element is paired with an icon *and* a text label, so colour-blind users and grayscale screenshots lose nothing.
 - **Text uses `-text` shades.** Base colours are for borders, icons and fills. Any coloured *text* uses the `-text` shade.
-- **Captions on `muted-bg` and tints use `ink-soft`.** `muted` drops below 4.5:1 on `muted-bg` and on several soft tints, so captions there switch to `ink-soft`.
+- **Captions on `muted-bg` and tints use `ink-soft`.** The old `muted` (`#64748B`) dropped below 4.5:1 there. `muted` is now `#475569` too, so this rule is kept for clarity rather than need.
 - **No white text on `success`.** White on `#16A34A` is only 3.30:1, so success is never a solid button with white text. Use the soft toast style instead.
 
 ### 2.6 Contrast check (WCAG 2.1 AA)
@@ -113,8 +113,10 @@ AA requires 4.5:1 for normal text and 3:1 for large text (≥ 18.66 px bold / 24
 | `ink` #020817 | `surface` #F8FAFC | 19.12 | ✅ |
 | `ink` #020817 | `muted-bg` #F1F5F9 | 18.26 | ✅ |
 | `ink` #020817 | any `-soft` tint | ≥ 18.2 | ✅ |
-| `muted` #64748B | `card` #FFFFFF | 4.76 | ✅ |
-| `muted` #64748B | `surface` #F8FAFC | 4.55 | ✅ |
+| `muted` #475569 | `card` #FFFFFF | 7.58 | ✅ |
+| `muted` #475569 | `surface` #F8FAFC | 7.24 | ✅ |
+| `muted` #475569 | `muted-bg` #F1F5F9 | 6.92 | ✅ |
+| `muted` #475569 | any `-soft` tint (feature / bug / due / success / danger) | ≥ 6.90 | ✅ |
 | `ink-soft` #475569 | `muted-bg` / any `-soft` tint | ≥ 6.9 | ✅ |
 | white | `brand` #2563EB | 5.17 | ✅ |
 | white | `brand-hover` #1D4ED8 | 6.70 | ✅ |
@@ -139,8 +141,7 @@ AA requires 4.5:1 for normal text and 3:1 for large text (≥ 18.66 px bold / 24
 
 | Text | Background | Ratio |
 |---|---|---|
-| `muted` #64748B | `muted-bg` #F1F5F9 | 4.34 ❌ |
-| `muted` #64748B | `feature-soft` / `bug-soft` / `due-calm-soft` / `due-done-soft` / `due-overdue-soft` | 4.34 / 4.33 / 4.46 / 4.34 / 4.35 ❌ |
+| *(old)* `muted` #64748B | `muted-bg` and the soft tints | 4.33–4.46 ❌ (fixed by darkening `muted` to #475569) |
 | `success` #16A34A | `card` / `success-soft` | 3.30 / 3.15 ❌ |
 | white | `success` #16A34A | 3.30 ❌ |
 | `danger` #DC2626 | `danger-soft` | 4.41 ❌ |
@@ -150,6 +151,28 @@ AA requires 4.5:1 for normal text and 3:1 for large text (≥ 18.66 px bold / 24
 | `due-done` #94A3B8 | `card` | 2.56 ❌ |
 
 **Non-text graphics (3:1).** The type card borders pass against the column's `muted-bg`: `feature` 5.20:1, `bug` 4.29:1. The type icons pass on the white badge pill: `feature` 5.70:1, `bug` 4.70:1. The `success` dot and Done column accent pass at 3.30:1 on `card` and 3.15:1 on `surface`. `line` (1.23:1) and the `due-calm` / `due-warning` / `due-done` left borders are below 3:1 against the column's `muted-bg` (2.53 / 2.91 / 2.34:1; `due-overdue` is 4.41:1). That's acceptable because they're decorative: borders aren't the only way to identify a card, and due state is always repeated in the date label and icon. Input borders must still show a `brand` focus ring (5.17:1).
+
+### 2.7 Avatar colours (team members)
+
+Each team member has their own avatar colour: a soft background with dark initials. It is stored on the member as `avatarColor` when they're created, so it never changes after a reload or when someone else is removed. Tokens: `bg-avatar-{key}-bg` / `text-avatar-{key}-text`.
+
+| Key (assignment order) | Background | Initials | Contrast | Hue (OKLCH) | Nearest semantic hue | Closest semantic tint (ΔE) |
+|---|---|---|---|---|---|---|
+| 1 `teal` | `#91E5CA` | `#084B3C` | 6.85:1 ✅ | 173° | success, 23° away | done-soft, 14.0 |
+| 2 `magenta` | `#F8B1DD` | `#6A1952` | 6.58:1 ✅ | 342° | bug, 35° away | bug-soft, 15.6 |
+| 3 `lime` | `#D7F5AB` | `#3A5006` | 7.53:1 ✅ | 126° | success, 24° away | success-soft, 10.0 |
+| 4 `cyan` | `#8BD9EA` | `#074550` | 6.69:1 ✅ | 213° | due calm, 24° away | brand-soft, 14.8 |
+| 5 `orchid` | `#F1D0FF` | `#602F72` | 7.08:1 ✅ | 316° | feature, 23° away | feature-soft, 9.0 |
+| 6 `olive` | `#D9D27A` | `#443F03` | 6.87:1 ✅ | 104° | success, 46° away | warning-soft, 16.3 |
+| 7 `aqua` | `#A3F6F6` | `#005354` | 7.22:1 ✅ | 196° | due calm, 41° away | brand-soft, 9.0 |
+| 8 `gold` | `#FFDC9E` | `#5D4304` | 7.04:1 ✅ | 83° | warning, 25° away | warning-soft, 10.2 |
+
+- **Why these hues.** The semantic colours sit at these OKLCH hues: red/rose 17–28°, amber 49–58°, green 150°, sky 237–243°, brand blue 263° and violet 293°. Done is a near-grey slate. The avatar hues fill the three gaps between them: yellow–lime, teal–cyan and orchid–magenta. Every avatar hue is **at least 22°** from every semantic hue.
+- **Telling avatars apart.** Neighbouring hues alternate light and deep backgrounds, so even the closest pair of avatars is 6.4 ΔE apart (OKLab ×100). Every avatar background is at least 9.0 ΔE from every semantic tint.
+- **Order.** Assignment order alternates across the wheel (teal → magenta → lime → cyan → …), so the first few members look most different.
+- **Assignment.** A new member gets the first colour nobody on the team uses. Removing someone frees their colour for the *next* new member and changes no one else's. With more than 8 members the colours cycle: the least-used colour, ties in palette order.
+- **Initials are always shown**, so identity never relies on colour alone. The member's name also appears next to every avatar.
+- **Where it applies:** cards, the Team members strip, the Team panel, the modal Owner box and the "Hand off to…" menu. The unassigned avatar stays a dashed outline.
 
 ## 3. Typography
 
@@ -161,13 +184,22 @@ Loaded from Google Fonts in `index.html`.
 | Body | Inter (400 / 500) | `font-sans` | One family for the whole UI keeps the board calm and consistent. |
 | Monospace (task IDs, Context field) | JetBrains Mono (400 / 500) | `font-mono` | Marks machine-ish content (IDs, prompts) as different from UI text, and keeps pasted prompts and code readable. |
 
-Sizes:
+Type scale (`fontSize` in `tailwind.config.js`). Sizes are in **rem**, so they follow the user's browser text size. Line-heights are **unitless**, so line spacing scales with the text when users enlarge it (WCAG 1.4.4 / 1.4.12):
 
-- Page title: 24 px / semibold
-- Section header: 16 px / semibold uppercase
-- Card title: 14 px / medium
-- Body: 14 px / regular
-- Caption: 12 px / regular, `muted` (or `ink-soft` on `muted-bg` and tints)
+| Token | Size | Line-height | Used for |
+|---|---|---|---|
+| `text-2xl` | 1.5rem (24 px) | 1.3 | Page title (semibold) |
+| `text-lg` | 1.125rem (18 px) | 1.5 | Markdown preview h1 |
+| `text-base` | **1rem (16 px)** | **1.5** | **All body / reading text:** inputs, selects, date fields, placeholders, type picker, description, Context box (JetBrains Mono), AI problems, Markdown preview body, delete / remove confirmations, save-failed alerts, storage banner, toasts. Also section and column headers (semibold uppercase) |
+| `text-sm` | 0.875rem (14 px) | 1.4 | Card titles and names (medium), form labels, buttons, field error messages, copy-failed message, secondary text |
+| `text-xs` | 0.75rem (12 px) | 1.4 | Compact metadata only: task IDs, count pills, type badges, due chips, avatar initials (§2.7), small captions. **Nothing is smaller than 12 px** |
+
+Rules:
+
+- **Body text is 16 px.** Anything a person reads as a sentence, or types into, is `text-base`. 16 px inputs also stop iOS Safari zooming in on focus.
+- **Errors are 14 px** (`text-sm`, line-height 1.4) with an alert icon: big enough to notice, compact enough to sit under a field.
+- **No px font sizes.** Use the tokens above. In Markdown, inline code is `0.9375em` (relative to its paragraph).
+- **Captions** use `muted` / `ink-soft` (`#475569`, at least 6.9:1 on every background).
 
 ## 4. Component principles
 

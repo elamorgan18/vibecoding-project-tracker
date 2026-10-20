@@ -1,7 +1,7 @@
 import { AlertCircle } from 'lucide-react';
 
 export const inputClass =
-  'w-full rounded border bg-card px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand';
+  'w-full rounded border bg-card px-3 py-2 text-base text-ink placeholder:text-muted focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand';
 
 /** Border class for an input, switching to `danger` when it has an error. */
 export function inputBorder(error) {
@@ -21,8 +21,8 @@ export default function FormField({ id, label, error, children }) {
       </label>
       {children}
       {error && (
-        <p id={`${id}-error`} className="mt-1 flex items-center gap-1 text-xs text-danger-text">
-          <AlertCircle aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+        <p id={`${id}-error`} className="mt-1 flex items-start gap-1 text-sm text-danger-text">
+          <AlertCircle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
           {error}
         </p>
       )}

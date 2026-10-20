@@ -35,6 +35,56 @@
 - Re-checked WCAG AA for all text/background pairs (DESIGN.md §2.6). New failure: `muted` on `muted-bg` (4.34:1), so captions on `muted-bg` use `ink-soft` (6.92:1). Violet `feature` passes as text (5.70:1 on `card`, 5.20:1 on `feature-soft`), and white on `feature` passes (5.70:1). `brand` passes on every neutral background (4.72:1 or better), and white on `brand` passes (5.17:1).
 - Failing pairs still listed in DESIGN.md: `muted` on `muted-bg` and on the feature / bug / due-calm / due-done / due-overdue tints; `success` as text and white on `success`; `danger` on `danger-soft`; `bug` on `bug-soft`; `due-calm`, `due-warning` and `due-done` as text on `card`.
 
+### Update (2026-10-20 13:45): typography accessibility fixes
+
+These changes follow the typography audit of the same day.
+
+- **Body / reading text: 14 px → 16 px (`text-base`, 1rem, line-height 1.5).** Applies to:
+  - all inputs, selects, date fields and placeholders (via the shared `inputClass`), plus the Type picker so it matches the Status select's height;
+  - the description textarea and the AI problems textarea;
+  - the **Context textarea** (JetBrains Mono, 13 px / `leading-relaxed` → 16 px / 1.5);
+  - the Markdown preview body (14 px / 1.625 → 16 px / 1.5; preview h1 16 → 18 px, h2 14 → 16 px; inline code `0.8125rem` → `0.9375em`) and its "Nothing to preview yet." line;
+  - delete-task and remove-member confirmations, the save-failed alert, the storage-full banner, and toasts.
+
+  Alert icons moved from `mt-0.5` to `mt-1` to line up with the taller line.
+- **Field errors and the copy-failed message: 12 px → 14 px** (`text-sm`, 0.875rem, line-height 1.4). The error icon grew from 14 px to 16 px and is top-aligned for messages that wrap.
+- **`muted` token darkened from `#64748B` to `#475569`** (the same value as `ink-soft`). Re-checked contrast:
+
+  | Background | Before | After |
+  |---|---|---|
+  | `card` | 4.76:1 | 7.58:1 |
+  | `surface` | 4.55:1 | 7.24:1 |
+  | `muted-bg` | 4.34:1 ❌ | 6.92:1 |
+  | feature / bug / due / danger tints | 4.33–4.46:1 ❌ | ≥ 6.90:1 |
+
+  Every `muted` text pair now passes AA, including placeholders.
+- **Unitless line-heights.** `tailwind.config.js` now overrides `fontSize`:
+
+  | Token | Size | Line-height |
+  |---|---|---|
+  | `xs` | 0.75rem | 1.4 |
+  | `sm` | 0.875rem | 1.4 |
+  | `base` | 1rem | 1.5 |
+  | `lg` | 1.125rem | 1.5 |
+  | `2xl` | 1.5rem | 1.3 |
+
+  Tailwind's defaults were rem-based (e.g. `text-xs` was 0.75rem on a fixed 1rem line, i.e. 1.33). The built CSS now has no rem or px line-heights.
+- **Removed the unused small avatar size** (`h-6 w-6 text-[11px]`) from `Avatar.jsx`. The avatar is now always 32 px with 12 px (0.75rem) initials. There are no px font sizes left in `src/`.
+- **Unchanged by design:** 12 px compact metadata (task IDs, count pills, type badges, due chips, avatar initials, small captions) and 14 px card titles, names, labels and buttons.
+- **Small layout tweak:** in the modal header, "created {date}" is kept on one line (`whitespace-nowrap`). At phone width it previously broke inside the date.
+- **DESIGN.md updated:**
+  - §2.1 `muted` hex and description.
+  - §2.5 caption notes.
+  - §2.6 contrast rows for the new `muted` (old failing row marked as fixed).
+  - §3 rewritten as a type-scale table (token, rem / px, unitless line-height, usage) with rules: body 16 px, errors 14 px, no px sizes, nothing under 12 px.
+- **Layout checked in a real browser:** a production build (`vite preview`) was driven in headless Microsoft Edge at 1440×900, 1280×800 and 390×844, checking the board, task modal (with preview, empty-title error and delete confirmation), toast and Team panel.
+  - No horizontal page overflow and no clipped text at any size.
+  - The modal fits the viewport (768 px wide on desktop, 358 px on phone).
+  - Measured sizes: inputs, selects, date, description, Context (JetBrains Mono) and AI problems are 16px / 24px; preview body 16px / 24px; confirmation 16px / 24px; toast 16px / 24px; field error 14px / 19.6px; card title and labels 14px / 19.6px; task ID and due chip 12px / 16.8px.
+  - Both web fonts loaded.
+  - The only console error was a 404 for `/favicon.ico`; the project has no favicon.
+- **Tested:** 155/155 jsdom checks still pass, and `npm run build` passes.
+
 ## Components / files changed
 
 | File | Change |
@@ -42,6 +92,14 @@
 | `DESIGN.md` | Filled in §1–§5 and the §6 wordmark style. Update: new §2.2 status section, feature colour changed, contrast table re-checked (now §2.6), principles and microcopy extended |
 | `tailwind.config.js` | Added colour tokens and `font-sans` / `font-mono`. Update: `feature` changed, `success` and `danger` added, `due.overdue` reuses `danger`. Update 2: tweakcn base palette (brand, ink, `muted-bg`), violet `feature`, `borderRadius.DEFAULT` |
 | `index.html` | Added Google Fonts links for Inter and JetBrains Mono |
+| `tailwind.config.js` (typography fixes) | `muted` → `#475569`; `fontSize` override with unitless line-heights (xs/sm 1.4, base/lg 1.5, 2xl 1.3) |
+| `src/components/FormField.jsx` | `inputClass` `text-sm` → `text-base`; error message `text-xs` → `text-sm`, 16 px icon |
+| `src/components/ContextSection.jsx` | Context textarea `text-[0.8125rem] leading-relaxed` → `text-base` (mono); copy status `text-xs` → `text-sm` |
+| `src/components/MarkdownPreview.jsx` | Body `text-sm leading-relaxed` → `text-base`; h1 `text-lg`, h2 `text-base`; inline code `0.9375em`; empty line `text-base` |
+| `src/components/TaskModal.jsx` | Delete confirmation and save-failed alert `text-base`; Type picker `text-base`; "created {date}" `whitespace-nowrap` |
+| `src/components/TeamPanel.jsx` | Remove confirmation `text-base` |
+| `src/components/Toast.jsx`, `src/App.jsx` | Toast and storage banner `text-base`; alert icons `mt-1` |
+| `src/components/Avatar.jsx` | Removed unused `sm` size (`text-[11px]`) and the `size` prop |
 | `src/index.css` | Body font changed to Inter first; comments renamed to token names. Update 2: body text colour set to new `ink` `#020817` |
 
 No React components were changed.

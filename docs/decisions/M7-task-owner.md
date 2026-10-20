@@ -42,6 +42,43 @@
   - All M5/M6 checks still pass, with no React warnings.
 - `npm run build` passes, and the Vite dev server on port 5173 serves and compiles all new modules.
 
+### Update (2026-10-20 13:53): a distinct avatar colour per member
+
+- **Palette of 8 avatar colour pairs** (soft background + dark initials), added to `tailwind.config.js` as `avatar.{key}.bg` / `avatar.{key}.text` and to DESIGN.md §2.7:
+
+  | Key (assignment order) | Background | Initials | Contrast | Hue (OKLCH) | Nearest semantic hue |
+  |---|---|---|---|---|---|
+  | 1 `teal` | `#91E5CA` | `#084B3C` | 6.85:1 | 173° | success, 23° away |
+  | 2 `magenta` | `#F8B1DD` | `#6A1952` | 6.58:1 | 342° | bug, 35° away |
+  | 3 `lime` | `#D7F5AB` | `#3A5006` | 7.53:1 | 126° | success, 24° away |
+  | 4 `cyan` | `#8BD9EA` | `#074550` | 6.69:1 | 213° | due calm, 24° away |
+  | 5 `orchid` | `#F1D0FF` | `#602F72` | 7.08:1 | 316° | feature, 23° away |
+  | 6 `olive` | `#D9D27A` | `#443F03` | 6.87:1 | 104° | success, 46° away |
+  | 7 `aqua` | `#A3F6F6` | `#005354` | 7.22:1 | 196° | due calm, 41° away |
+  | 8 `gold` | `#FFDC9E` | `#5D4304` | 7.04:1 | 83° | warning, 25° away |
+
+  - **Contrast:** every pair passes WCAG AA (lowest 6.58:1).
+  - **Away from semantic hues:** every hue is at least 22° (OKLCH) from all semantic hues (bug/danger, warning, success, due calm, brand/selection ring, feature). Done is near-grey.
+  - **Away from semantic tints:** every background is at least 9.0 ΔE from every semantic tint.
+  - **Away from each other:** every background is at least 6.4 ΔE from every other avatar. Neighbouring hues alternate light and deep backgrounds; an earlier same-lightness draft was only 3.5 ΔE apart.
+- **Stored on the member:** a new `Member.avatarColor` field, set once when the member is created (`addMember` in `src/data/team.js`).
+  - **Assignment:** `nextAvatarColor()` in the new `src/data/avatarColors.js` picks the first palette colour nobody on the team uses. With more than 8 members it cycles to the least-used colour, ties in palette order.
+  - **Removing a member** doesn't change anyone else's colour; the freed colour goes to the next new member.
+- **Mock members:** Priya Shah `teal`, Tom Okafor `magenta`, Sam Rivera `lime` (in `src/data/seed.js`).
+- **Members saved before this change** (no `avatarColor`) are given one on load (`withTeamAvatarColors` in `App.jsx`) and it's stored. Members who already have a colour are untouched.
+- **Where the colour appears:** `Avatar.jsx` uses the member's colour, so cards, the Team members strip, the Team panel and the modal Owner box all show it. Avatars were previously `bg-brand-soft text-brand-hover` for everyone. The initials are always shown, so identity never relies on colour alone.
+- **"Hand off to…" is now a custom listbox** (`src/components/HandOffMenu.jsx`) instead of a native `<select>`, because browsers can't style `<option>`s to show coloured avatars. Each option shows the member's avatar and name.
+  - **Opening:** a button with `aria-haspopup="listbox"` / `aria-expanded`. Enter, Space, ArrowDown or ArrowUp opens the list.
+  - **Moving:** the list uses `role="listbox"` with `aria-activedescendant`. ArrowUp/Down and Home/End move.
+  - **Picking:** Enter/Space picks. Picking still reassigns immediately and shows the same toast.
+  - **Closing:** Escape closes only the menu (the modal stays open) and returns focus to the button. Tab or an outside click also closes it.
+  - **No one else on the team:** the button is disabled with "No one to hand off to".
+  - **Create mode:** keeps the native Assignee `<select>`.
+- **Tested:**
+  - 174/174 jsdom checks pass. New checks cover: the listbox's ARIA state and keyboard behaviour; Escape not closing the modal; avatars in every option; the seeded colours surviving another member's removal; next-unused assignment (cyan, then the freed teal, then orchid / olive / aqua / gold); 9th-member cycling; removal not changing others; the colour classes on cards, strip, Team panel, Owner box and hand-off options; persistence after reload; and colours filled in for older saved members.
+  - **Headless Edge:** I added 8 members through the real Team panel and screenshotted the board, strip, Team panel and open hand-off menu. All 8 colours were distinct, and the closest-looking pairs are within the teal/cyan/aqua and lime/olive/gold families.
+  - `npm run build` passes, and all 16 avatar classes are in the built CSS.
+
 ### Rename (2026-10-20 13:38): "Who's driving what" → "Team members"
 
 - **Strip heading:** changed from "Who's driving what" to **"Team members"**.
@@ -72,7 +109,11 @@
 
 | File | Change |
 |---|---|
-| `src/components/Avatar.jsx` | New. Initials avatar (`sm` 24 px / `md` 32 px) and dashed unassigned placeholder; `initials()` helper |
+| `src/components/Avatar.jsx` | New. Initials avatar (`sm` 24 px / `md` 32 px) and dashed unassigned placeholder; `initials()` helper. Update: per-member colour classes (`data-avatar-color`) |
+| `src/data/avatarColors.js` | New (update). `AVATAR_COLORS` order, `nextAvatarColor()`, `withAvatarColors()` |
+| `src/components/HandOffMenu.jsx` | New (update). Accessible listbox replacing the native "Hand off to…" select |
+| `src/data/team.js` (update) | `addMember` stores `avatarColor`; new `withTeamAvatarColors()` |
+| `src/data/seed.js`, `src/data/model.js`, `tailwind.config.js`, `src/App.jsx`, `src/components/TaskModal.jsx` (update) | Mock member colours; `Member.avatarColor` typedef; `avatar` palette tokens; on-load colour fill-in; `HandOffMenu` in the Owner box |
 | `src/components/Toast.jsx` | New. Success toast with live region, 4 s auto-dismiss, Dismiss button |
 | `src/components/DrivingStrip.jsx` (now `TeamMembersStrip.jsx`) | New. "Who's driving what" strip. Renamed 2026-10-20 to `TeamMembersStrip` with heading "Team members" |
 | `src/components/TeamPanel.jsx` | New. Team dialog: member list, inline remove confirmation, add-member form with validation |
@@ -93,7 +134,7 @@
 
 | Element | Tokens | Contrast |
 |---|---|---|
-| Avatar | `bg-brand-soft text-brand-hover`, `ring-2 ring-card` | 6.16:1 ✅ |
+| Avatar | `bg-brand-soft text-brand-hover`, `ring-2 ring-card` (until 2026-10-20 13:53; now each member's own `bg-avatar-{key}-bg text-avatar-{key}-text`, 6.58–7.53:1, see update above) | 6.16:1 ✅ |
 | Unassigned avatar | `border-dashed border-ink-soft bg-card text-ink-soft` | 7.58:1 ✅ |
 | Card owner name | `text-ink` on type tint | ≥ 18.2:1 ✅ |
 | Card focus / selected (bug fix) | `focus-within:ring-2 ring-brand ring-offset-2 ring-offset-muted-bg` | ring 4.72:1 vs `muted-bg` gap ✅ (was flush against the type border at 1.10:1) |

@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { AlertTriangle, ArrowRightLeft, Trash2, X } from 'lucide-react';
+import { AlertTriangle, Trash2, X } from 'lucide-react';
 import { contextChanged, contextValues, NEW_TASK_CONTEXT } from '../data/context.js';
 import { dueState } from '../data/due.js';
 import { STAGES, TASK_TYPES } from '../data/model.js';
@@ -9,6 +9,7 @@ import CopyContextButton from './CopyContextButton.jsx';
 import Dialog from './Dialog.jsx';
 import DueChip from './DueChip.jsx';
 import FormField, { inputBorder, inputClass } from './FormField.jsx';
+import HandOffMenu from './HandOffMenu.jsx';
 import TypeBadge, { TYPE_META } from './TypeBadge.jsx';
 
 const EMPTY_FORM = {
@@ -61,9 +62,7 @@ export default function TaskModal({ task, members, onSave, onDelete, onHandOff, 
     };
   }
 
-  function handleHandOff(e) {
-    const memberId = e.target.value;
-    if (!memberId) return;
+  function handleHandOff(memberId) {
     setForm((f) => ({ ...f, assignee: memberId }));
     onHandOff(task.id, memberId);
   }
@@ -101,7 +100,7 @@ export default function TaskModal({ task, members, onSave, onDelete, onHandOff, 
           </div>
           {isEdit && (
             <p className="mt-0.5 font-mono text-xs text-ink-soft">
-              {task.id} · created {task.createdDate}
+              {task.id} · <span className="whitespace-nowrap">created {task.createdDate}</span>
             </p>
           )}
         </div>
@@ -132,31 +131,7 @@ export default function TaskModal({ task, members, onSave, onDelete, onHandOff, 
                   </p>
                 </div>
               </div>
-              <div className="relative">
-                <label htmlFor="task-handoff" className="sr-only">
-                  Hand off to…
-                </label>
-                <ArrowRightLeft
-                  aria-hidden="true"
-                  className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft"
-                />
-                <select
-                  id="task-handoff"
-                  value=""
-                  onChange={handleHandOff}
-                  disabled={handOffTargets.length === 0}
-                  className={`${inputClass} border-line pl-9 disabled:cursor-not-allowed disabled:bg-muted-bg disabled:text-ink-soft sm:w-56`}
-                >
-                  <option value="" disabled>
-                    {handOffTargets.length === 0 ? 'No one to hand off to' : 'Hand off to…'}
-                  </option>
-                  {handOffTargets.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <HandOffMenu members={handOffTargets} onSelect={handleHandOff} />
             </div>
           )}
 
@@ -193,7 +168,7 @@ export default function TaskModal({ task, members, onSave, onDelete, onHandOff, 
                   return (
                     <label
                       key={type}
-                      className={`flex cursor-pointer items-center justify-center gap-1.5 rounded border px-3 py-2 text-sm font-medium focus-within:ring-2 focus-within:ring-brand ${
+                      className={`flex cursor-pointer items-center justify-center gap-1.5 rounded border px-3 py-2 text-base font-medium focus-within:ring-2 focus-within:ring-brand ${
                         checked ? selected : 'border-line text-ink-soft hover:bg-muted-bg'
                       }`}
                     >
@@ -266,8 +241,8 @@ export default function TaskModal({ task, members, onSave, onDelete, onHandOff, 
         </div>
 
         {saveError && (
-          <div role="alert" className="mx-5 mb-4 flex items-start gap-2 rounded border border-danger bg-danger-soft p-3 text-sm text-ink">
-            <AlertTriangle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-danger" />
+          <div role="alert" className="mx-5 mb-4 flex items-start gap-2 rounded border border-danger bg-danger-soft p-3 text-base text-ink">
+            <AlertTriangle aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-danger" />
             <p>
               <span className="font-semibold text-danger-text">Couldn't save. </span>
               {saveError} Your text is still here: use <strong>Copy</strong> on the Context box to keep a copy, then
@@ -278,8 +253,8 @@ export default function TaskModal({ task, members, onSave, onDelete, onHandOff, 
 
         {confirmingDelete ? (
           <div className="flex flex-col gap-3 border-t border-line bg-danger-soft px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="flex items-start gap-2 text-sm text-ink">
-              <AlertTriangle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-danger" />
+            <p className="flex items-start gap-2 text-base text-ink">
+              <AlertTriangle aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-danger" />
               Delete this task and its prompt history? This can't be undone.
             </p>
             <div className="flex shrink-0 items-center gap-3">

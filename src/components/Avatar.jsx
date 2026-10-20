@@ -1,4 +1,5 @@
 import { UserRound } from 'lucide-react';
+import { AVATAR_COLORS } from '../data/avatarColors.js';
 
 export function initials(name) {
   return name
@@ -10,21 +11,40 @@ export function initials(name) {
     .toUpperCase();
 }
 
-const SIZES = {
-  sm: 'h-6 w-6 text-[11px]',
-  md: 'h-8 w-8 text-xs',
+// 32px circle, 12px (0.75rem) initials.
+const SIZE = 'h-8 w-8 text-xs';
+
+// Full class strings so Tailwind can find them (DESIGN.md §2.7).
+const COLOR_CLASSES = {
+  teal: 'bg-avatar-teal-bg text-avatar-teal-text',
+  magenta: 'bg-avatar-magenta-bg text-avatar-magenta-text',
+  lime: 'bg-avatar-lime-bg text-avatar-lime-text',
+  cyan: 'bg-avatar-cyan-bg text-avatar-cyan-text',
+  orchid: 'bg-avatar-orchid-bg text-avatar-orchid-text',
+  olive: 'bg-avatar-olive-bg text-avatar-olive-text',
+  aqua: 'bg-avatar-aqua-bg text-avatar-aqua-text',
+  gold: 'bg-avatar-gold-bg text-avatar-gold-text',
 };
 
+// Members should always have a stored colour; this only guards bad data.
+function colorFor(member) {
+  if (COLOR_CLASSES[member.avatarColor]) return member.avatarColor;
+  const hash = [...member.id].reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+}
+
 /**
- * Initials avatar for a member, or a dashed placeholder when unassigned.
- * Decorative (aria-hidden): the member's name is always shown next to it.
+ * Initials avatar in the member's own colour, or a dashed placeholder when
+ * unassigned. The initials are always shown, so identity never relies on
+ * colour alone. Decorative (aria-hidden): the member's name is always shown
+ * next to it.
  */
-export default function Avatar({ member, size = 'md' }) {
+export default function Avatar({ member }) {
   if (!member) {
     return (
       <span
         aria-hidden="true"
-        className={`flex shrink-0 items-center justify-center rounded-full border border-dashed border-ink-soft bg-card text-ink-soft ${SIZES[size]}`}
+        className={`flex shrink-0 items-center justify-center rounded-full border border-dashed border-ink-soft bg-card text-ink-soft ${SIZE}`}
       >
         <UserRound className="h-1/2 w-1/2" />
       </span>
@@ -34,7 +54,8 @@ export default function Avatar({ member, size = 'md' }) {
   return (
     <span
       aria-hidden="true"
-      className={`flex shrink-0 items-center justify-center rounded-full bg-brand-soft font-semibold text-brand-hover ring-2 ring-card ${SIZES[size]}`}
+      data-avatar-color={colorFor(member)}
+      className={`flex shrink-0 items-center justify-center rounded-full font-semibold ring-2 ring-card ${SIZE} ${COLOR_CLASSES[colorFor(member)]}`}
     >
       {initials(member.name)}
     </span>

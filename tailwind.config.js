@@ -35,11 +35,26 @@ export default {
           DEFAULT: '#020817',
           soft: '#475569', // captions on muted-bg and tinted backgrounds
         },
-        muted: '#64748B',
+        // Darkened from #64748B (4.55:1 on surface) for contrast margin; now the
+        // same value as ink-soft (≥ 6.9:1 on every background it sits on).
+        muted: '#475569',
 
         // Status: confirmation toasts, deliverable dot, Done accent / delete, errors, overdue
         success,
         danger,
+
+        // Avatar colours (DESIGN.md §2.7): soft background + dark initials.
+        // Hues sit ≥ 22° (OKLCH) from every semantic hue; initials ≥ 6.5:1.
+        avatar: {
+          teal: { bg: '#91E5CA', text: '#084B3C' },
+          magenta: { bg: '#F8B1DD', text: '#6A1952' },
+          lime: { bg: '#D7F5AB', text: '#3A5006' },
+          cyan: { bg: '#8BD9EA', text: '#074550' },
+          orchid: { bg: '#F1D0FF', text: '#602F72' },
+          olive: { bg: '#D9D27A', text: '#443F03' },
+          aqua: { bg: '#A3F6F6', text: '#005354' },
+          gold: { bg: '#FFDC9E', text: '#5D4304' },
+        },
 
         // Task type (M6 tag-style): corner badge + icon
         feature: {
@@ -72,6 +87,15 @@ export default {
             text: '#475569',
           },
         },
+      },
+      // Type scale (DESIGN.md §3). Sizes in rem; line-heights unitless so they
+      // scale with the text when users enlarge it (Tailwind's defaults are rem).
+      fontSize: {
+        xs: ['0.75rem', { lineHeight: '1.4' }], //   12px compact metadata
+        sm: ['0.875rem', { lineHeight: '1.4' }], //  14px card titles, names, labels, errors
+        base: ['1rem', { lineHeight: '1.5' }], //    16px body / reading text, inputs
+        lg: ['1.125rem', { lineHeight: '1.5' }], //  18px Markdown h1
+        '2xl': ['1.5rem', { lineHeight: '1.3' }], // 24px page title
       },
       // 200 ms fade-in for toasts (DESIGN.md §7).
       keyframes: {
