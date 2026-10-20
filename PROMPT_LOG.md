@@ -123,3 +123,17 @@ Keep the rule that every colour is paired with an icon and label. Re-check WCAG 
 ````
 
 **Summary:** Confirmed Tailwind v3 and translated the tweakcn base palette into `tailwind.config.js` (blue brand, `ink` #020817, new `muted-bg`, radius 0.375rem, violet `feature`). Set the body colour in `src/index.css`. Re-checked WCAG AA and updated `DESIGN.md` (tweakcn noted as source, failing pairs listed), and recorded the factual changes in `docs/decisions/M3-design.md`.
+
+## M4 – data-model
+
+### 2026-10-20 11:57 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+M4: Task fields: id, title, description, type (feature/bug), status, assignee, dueDate, createdDate. Create a team with 3 mock members (name, email, githubUsername); assignee references a member. Render a four-column Kanban (To Do, In Progress, Review, Done) using our Tailwind tokens, with 4 mock tasks across columns. Each card shows at least title and assignee. Run the dev server and fix any errors. Fill in the factual sections of docs/decisions/M4-data-model.md.
+````
+
+**Summary:** Added the Team/Project/Task model (`src/data/model.js`), mock data (`src/data/seed.js`) and the moved `src/hooks/useLocalStorage.js`. Added the board components (`Board`, `Column`, `TaskCard`), rewrote `src/App.jsx` and added `lucide-react`. Verified with build, the running dev server and a render check, then filled in `docs/decisions/M4-data-model.md` and updated file paths in `CLAUDE.md`.

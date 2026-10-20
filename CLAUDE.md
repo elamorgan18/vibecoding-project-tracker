@@ -7,7 +7,7 @@ These rules override the hackathon starter docs (`PRD.md`, `README.md`) wherever
 - Kanban project tracker for vibecoding projects.
 - Stack: React + Vite + Tailwind. Deployed to Vercel later.
 - Users: junior and more experienced developers working in teams who build software with AI tools.
-- Board columns are the four `STAGES` in `src/App.jsx` (To Do, In Progress, Review, Done).
+- Board columns are the four `STAGES` in `src/data/model.js` (To Do, In Progress, Review, Done).
 
 ## Context
 
@@ -24,7 +24,7 @@ These rules override the hackathon starter docs (`PRD.md`, `README.md`) wherever
   - outcome
   - problems hit with the AI
 - This extends the starter `Task` model in `PRD.md` §5 (which only has `context`, `contextTool`, `contextUpdatedAt`). `Task.assignee` refers to a team member, not the PRD's fixed three teammate names.
-- Persistence: **localStorage** for now, via the `useLocalStorage` hook in `src/App.jsx`.
+- Persistence: **localStorage** for now, via the `useLocalStorage` hook in `src/hooks/useLocalStorage.js`.
 
 ## Auth
 
