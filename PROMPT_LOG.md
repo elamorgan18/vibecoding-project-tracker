@@ -55,3 +55,71 @@ M1: Add a section to README.md saying this is my project repo, and an "AI tools 
 ````
 
 **Summary:** Added "About this repo" and "AI tools used" sections (Claude Opus 5.5, `claude-opus-5-5`) to `README.md`. Added a rule to `CLAUDE.md` that keeps the model list current across sessions.
+
+## M3 – design-done
+
+### 2026-10-20 11:35 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+M3: Update DESIGN.md with these choices. Mood: "A calm, focused workspace that stays quiet by default and only gets loud when something needs your attention." Colours: brand #4F46E5 (hover #4338CA), surface #F8FAFC, card #FFFFFF, line #E2E8F0, ink #0F172A, muted #64748B, feature #0D9488, bug #E11D48, due calm #0EA5E9, due warning #D97706, due overdue #DC2626, due done #94A3B8, each with a light "soft" tint for backgrounds. Feature/bug is shown through the corner badge and icon; due-date state through the card's left border and background tint, so the two never clash. Every colour is paired with an icon or label, never colour alone. Fonts: Inter for headings and body, JetBrains Mono for task IDs and the Context field (load from Google Fonts). Write 3–4 sentences of component principles and microcopy lines to match. Add all colours and fonts to tailwind.config.js as named tokens, and check text/background pairs meet WCAG AA contrast.
+````
+
+**Summary:** Filled in `DESIGN.md` (mood, palette with soft tints, AA contrast table, typography, component principles, microcopy). Added AA-safe `-text` shades and `ink-soft` for colours that failed as text. Added all colour and font tokens to `tailwind.config.js`, loaded Inter and JetBrains Mono in `index.html`, and set Inter as the body font in `src/index.css`.
+
+### 2026-10-20 11:38 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Fill in DESIGN.md §6 product name: "[your name]". §1 visual references: [e.g. Linear, Trello, GitHub Projects], chosen for [one line on why]. Use the product name in the app header too.
+````
+
+**Summary:** No changes. The prompt still had its template placeholders, so I asked for the real product name, references and reason. Only `PROMPT_LOG.md` changed (this entry).
+
+### 2026-10-20 11:44 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Create a folder docs/decisions/ with one markdown file per milestone (M3-design.md, M4-data-model.md, M5-crud-modal.md … M13-pitch-ready.md). Add a rule to CLAUDE.md: after each milestone, fill in the factual sections of that milestone's file: what was built, components/files changed, colours/fonts/icons/interactions used, and a placeholder screenshot path (docs/screenshots/M#.png). Leave these sections empty with "[TO COMPLETE]" for me to write myself, and never fill them in: Why I chose this, Alternatives considered, UX principle / literature reference, Requirement IDs this maps to. Fill in M3-design.md's factual sections now from DESIGN.md.
+````
+
+**Summary:** Created `docs/decisions/` with M3–M13 decision files (the four "[TO COMPLETE]" sections left for the developer). Filled in the factual sections of `M3-design.md` from `DESIGN.md`, and added the decision-log rule to `CLAUDE.md`.
+
+### 2026-10-20 11:47 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Update the design: feature colour becomes blue #2563EB (soft #EFF6FF) so feature vs bug is not a red/green pair. Add success #16A34A (soft #F0FDF4) and danger #DC2626 (soft #FEF2F2) tokens. Use success for confirmation toasts, the filled deliverable dot, and the Done column accent, always with a check icon and text. Use danger for the delete button, form errors and overdue state, always with a trash or alert icon and text. Update DESIGN.md and tailwind.config.js, and re-check WCAG AA contrast for all text/background pairs. Record the change in docs/decisions/M3-design.md (factual sections only).
+````
+
+**Summary:** Changed feature to blue and added `success` and `danger` tokens (with `-text` shades and `danger-hover`; `due-overdue` now reuses `danger`) in `tailwind.config.js` and `DESIGN.md`. Re-checked the WCAG AA contrast table, and recorded the update in the factual sections of `docs/decisions/M3-design.md`.
+
+### 2026-10-20 11:54 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+I'm basing the base palette on a tweakcn community theme (blue/slate "Professional"-style theme from tweakcn.com/community). First check package.json for the Tailwind version. Do NOT paste the v4 @theme CSS if the project uses Tailwind v3; translate it into tailwind.config.js tokens instead.
+
+Base tokens: brand #2563EB (hover #1D4ED8), surface #F8FAFC, card #FFFFFF, muted-bg #F1F5F9, line #E2E8F0, ink #020817, muted #64748B. Radius 0.375rem. Fonts Inter (sans) and JetBrains Mono (mono).
+
+Meaning tokens: feature #7C3AED (soft #F5F3FF), bug #E11D48 (soft #FFF1F2), success #16A34A (soft #F0FDF4), danger #DC2626 (soft #FEF2F2), due calm #0EA5E9, due warning #D97706, due overdue #DC2626, due done #94A3B8, each with a soft tint.
+
+Keep the rule that every colour is paired with an icon and label. Re-check WCAG AA contrast for all text/background pairs and list any that fail. Update DESIGN.md (note tweakcn.com/community as the palette source) and record the factual changes in docs/decisions/M3-design.md.
+````
+
+**Summary:** Confirmed Tailwind v3 and translated the tweakcn base palette into `tailwind.config.js` (blue brand, `ink` #020817, new `muted-bg`, radius 0.375rem, violet `feature`). Set the body colour in `src/index.css`. Re-checked WCAG AA and updated `DESIGN.md` (tweakcn noted as source, failing pairs listed), and recorded the factual changes in `docs/decisions/M3-design.md`.

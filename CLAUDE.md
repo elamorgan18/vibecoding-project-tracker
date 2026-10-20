@@ -47,6 +47,22 @@ After every request from the user, append an entry to `PROMPT_LOG.md` under a he
 
 Never edit or delete earlier entries. Only append.
 
+## Decision logs (`docs/decisions/`)
+
+There is one file per milestone: `M3-design.md`, `M4-data-model.md`, … `M13-pitch-ready.md`. After each milestone, fill in that milestone's file.
+
+**Fill in (factual sections only):**
+- **What was built**
+- **Components / files changed**
+- **Colours, fonts, icons & interactions used**
+- **Screenshot:** placeholder path `docs/screenshots/M#.png`. Don't create the image; the developer adds it.
+
+**Never fill in.** Leave these exactly as `[TO COMPLETE]` for the developer to write, even if asked to "complete the file":
+- Why I chose this
+- Alternatives considered
+- UX principle / literature reference
+- Requirement IDs this maps to
+
 ## AI tools used (README)
 
 `README.md` has an "AI tools used" section listing every Claude model used on this project (name and model ID). At the start of each session, check it. If the model you are running isn't listed, add it as a new row. Never remove earlier models.

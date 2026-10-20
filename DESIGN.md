@@ -1,114 +1,192 @@
 # Vibecoding Project Tracker — Design
 
-**Status:** Hackathon starter design doc · fill in the **`<TODO>`** sections before you tag `design-done`.
+**Status:** M3 `design-done` · colours, radius and fonts are in `tailwind.config.js` as named tokens.
 
-**Why this file exists.** This tracker is your tool. It should look like *your* tool — not a generic Kanban with default Tailwind blue. Twenty minutes of design decisions here will be visible on every screen for the next six weeks of Module 5.
+**Why this file exists.** This tracker should look like *my* tool, not a generic Kanban. Every build milestone references the tokens and rules below.
 
-**Who owns this.** Person B, during the same window the rest of the team is reviewing the PRD. By the time the team converges to start M4 (`data-model`), this file should be filled in and the colors should already be in `tailwind.config.js`.
+**Palette source.** The base palette (brand, neutrals, radius, fonts) is based on a blue/slate "Professional"-style community theme from [tweakcn.com/community](https://tweakcn.com/community). tweakcn exports Tailwind v4 `@theme` CSS. This project uses **Tailwind v3** (`tailwindcss ^3.4.13` in `package.json`), so the theme was translated into `tailwind.config.js` tokens instead of being pasted as CSS. The meaning tokens (task type, status, due state) are my own additions on top.
 
 ---
 
 ## 1. Mood / vibe
 
-One sentence that captures the feeling the tracker should leave you with.
+> A calm, focused workspace that stays quiet by default and only gets loud when something needs your attention.
 
-`<TODO>`
+In practice: a cool slate page, white cards, one blue brand colour, and no colour at all on a card unless it's telling you something. Warm colours (amber, red) are saved for deadlines and actions that need attention.
 
-Two or three references that capture the vibe (links to dribbble shots, screenshots of apps you admire, Pinterest boards — anything visual):
-
-- `<TODO>`
-- `<TODO>`
-- `<TODO>`
-
-Anti-references — what we are explicitly **not** trying to look like:
+References:
 
 - `<TODO>`
+- `<TODO>`
+
+Anti-references (what this is **not**):
+
+- Busy, rainbow-tagged boards where every card shouts at once.
 
 ## 2. Color palette
 
-These are the colors the build milestones will reference. Once chosen, paste the hex values into `tailwind.config.js` so the rest of the team can use Tailwind utility classes (e.g. `bg-brand-primary`, `border-due-warning`).
+Every hex below is a Tailwind token (see §2.6 for class names). Each meaning colour has a **soft** tint for backgrounds. Colours that are too light to pass WCAG AA as text also have a darker **text** shade.
 
-### Brand
+### 2.1 Base tokens (from tweakcn)
 
 | Token | Hex | Where it shows up |
 |---|---|---|
-| `brand-primary` | `<TODO>` | Header, "+" button, focus rings |
-| `brand-accent` | `<TODO>` | Highlights, hover states, links |
-| `surface-page` | `<TODO>` | Page background |
-| `surface-card` | `<TODO>` | Card background |
-| `text-primary` | `<TODO>` | Body text |
-| `text-muted` | `<TODO>` | Captions, dates, counts |
+| `brand` | `#2563EB` | Header accents, "+" button, focus rings, links |
+| `brand-hover` | `#1D4ED8` | Hover / pressed state of brand buttons and links |
+| `brand-soft` | `#EFF6FF` | Selected states, active filter chips (my addition, not part of the tweakcn theme) |
+| `surface` | `#F8FAFC` | Page background |
+| `card` | `#FFFFFF` | Card and modal background |
+| `muted-bg` | `#F1F5F9` | Column backgrounds, chips, disabled inputs, secondary panels |
+| `line` | `#E2E8F0` | Card borders, dividers, input borders |
+| `ink` | `#020817` | Body text, card titles |
+| `ink-soft` | `#475569` | Captions and dates **on `muted-bg` and tinted backgrounds** (my addition, see §2.5) |
+| `muted` | `#64748B` | Captions, dates, counts on `card` / `surface` only |
 
-### Task type (M6 `tag-style`)
+**Radius:** `0.375rem` (6 px). This is Tailwind's `rounded` (the default is overridden in config) and `rounded-md`. Use it for cards, buttons, inputs, badges and the modal.
 
-| Token | Hex | When used |
+### 2.2 Status: success & danger
+
+| Token | Base (icon, fill, accent) | `-soft` (bg) | `-text` (label) | Icon (Lucide) | Used for |
+|---|---|---|---|---|---|
+| `success` | `#16A34A` | `#F0FDF4` | `#15803D` | `check` / `check-circle` | Confirmation toasts, filled deliverable dot, Done column accent |
+| `danger` | `#DC2626` | `#FEF2F2` | `#B91C1C` | `trash-2` (delete) / `alert-circle` (errors) / `alert-triangle` (overdue) | Delete button, form errors, overdue state |
+
+`danger-hover` (`#B91C1C`) is the hover / pressed state of the delete button.
+
+How each one is shown. Every use always pairs the colour with an icon **and** text:
+
+- **Confirmation toast:** `success-soft` background, `success` check icon, message in `success-text` or `ink`.
+- **Filled deliverable dot:** solid `success` dot with a check and the label "Added". An empty slot is a dashed `line` circle with "Not added yet" in `muted`.
+- **Done column accent:** `success` top border on the Done column header, a check icon, and the "Done" label.
+- **Delete button:** solid `danger` with white text and a `trash-2` icon ("Delete task"). Hover is `danger-hover`.
+- **Form error:** `danger` input border, `alert-circle` icon, message in `danger-text` below the field.
+- **Overdue card:** `due-overdue`, which shares the `danger` values (see §2.4).
+
+### 2.3 Task type (M6 `tag-style`): corner badge + icon
+
+| Token | Base (icon, fill) | `-soft` (badge bg) | `-text` (badge label) | Icon (Lucide) | Label |
+|---|---|---|---|---|---|
+| `feature` | `#7C3AED` | `#F5F3FF` | `#6D28D9` | `sparkles` | "Feature" |
+| `bug` | `#E11D48` | `#FFF1F2` | `#BE123C` | `bug` | "Bug" |
+
+Feature is **violet** and bug is **rose**: not a red/green pair, and violet is clearly separate from the blue brand colour. `feature` already passes AA as text (5.20:1 on its tint). `feature-text` exists only to match the other badges.
+
+### 2.4 Due-date state (M8 `due-tint`): left border + card background tint
+
+| Token | Base (left border) | `-soft` (card bg) | `-text` (date label) | Icon (Lucide) | Label |
+|---|---|---|---|---|---|
+| `due-calm` | `#0EA5E9` | `#F0F9FF` | `#0369A1` | `calendar` | "Due {date}" |
+| `due-warning` | `#D97706` | `#FFFBEB` | `#B45309` | `clock` | "Due soon" |
+| `due-overdue` (= `danger`) | `#DC2626` | `#FEF2F2` | `#B91C1C` | `alert-triangle` | "Overdue" |
+| `due-done` | `#94A3B8` | `#F1F5F9` | `#475569` | `check-circle` | "Done" |
+
+`due-calm` covers more than 24 hours out, `due-warning` less than 24 hours, `due-overdue` past due. `due-done` overrides the date once a task's status is Done. Tasks with no due date stay plain white with a `line` border. In `tailwind.config.js`, `due-overdue` is defined as the same object as `danger`, so the two can't drift apart.
+
+### 2.5 How colour is used
+
+- **Two card channels that never clash.** Task type lives only in the **corner badge** (icon + label). Due state lives only in the card's **left border and background tint**, plus a date label with its icon. A card can be "bug + overdue" without the reds competing: the badge is a small pill, the tint is the whole card.
+- **Success and danger mean one thing each.** Green only ever means "done / confirmed". Red (`danger`) only ever means "destructive, wrong or late".
+- **Never colour alone.** Every coloured element is paired with an icon *and* a text label, so colour-blind users and grayscale screenshots lose nothing.
+- **Text uses `-text` shades.** Base colours are for borders, icons and fills. Any coloured *text* uses the `-text` shade.
+- **Captions on `muted-bg` and tints use `ink-soft`.** `muted` drops below 4.5:1 on `muted-bg` and on several soft tints, so captions there switch to `ink-soft`.
+- **No white text on `success`.** White on `#16A34A` is only 3.30:1, so success is never a solid button with white text. Use the soft toast style instead.
+
+### 2.6 Contrast check (WCAG 2.1 AA)
+
+AA requires 4.5:1 for normal text and 3:1 for large text (≥ 18.66 px bold / 24 px) and UI graphics. All ratios were calculated with the WCAG relative-luminance formula and re-checked after the tweakcn base palette update.
+
+**Approved text / background pairs**
+
+| Text | Background | Ratio | AA |
+|---|---|---|---|
+| `ink` #020817 | `card` #FFFFFF | 20.01 | ✅ |
+| `ink` #020817 | `surface` #F8FAFC | 19.12 | ✅ |
+| `ink` #020817 | `muted-bg` #F1F5F9 | 18.26 | ✅ |
+| `ink` #020817 | any `-soft` tint | ≥ 18.2 | ✅ |
+| `muted` #64748B | `card` #FFFFFF | 4.76 | ✅ |
+| `muted` #64748B | `surface` #F8FAFC | 4.55 | ✅ |
+| `ink-soft` #475569 | `muted-bg` / any `-soft` tint | ≥ 6.9 | ✅ |
+| white | `brand` #2563EB | 5.17 | ✅ |
+| white | `brand-hover` #1D4ED8 | 6.70 | ✅ |
+| `brand` #2563EB | `card` / `surface` / `muted-bg` / `brand-soft` | 5.17 / 4.94 / 4.72 / 4.75 | ✅ |
+| `brand-hover` #1D4ED8 | `brand-soft` | 6.16 | ✅ |
+| `feature` #7C3AED | `card` / `feature-soft` | 5.70 / 5.20 | ✅ |
+| `feature-text` #6D28D9 | `feature-soft` / `card` | 6.48 / 7.10 | ✅ |
+| white | `feature` #7C3AED | 5.70 | ✅ |
+| `bug-text` #BE123C | `bug-soft` / `card` | 5.72 / 6.29 | ✅ |
+| `success-text` #15803D | `success-soft` / `card` | 4.79 / 5.02 | ✅ |
+| `danger-text` #B91C1C | `danger-soft` / `card` | 5.91 / 6.47 | ✅ |
+| white | `danger` #DC2626 (delete button) | 4.83 | ✅ |
+| white | `danger-hover` #B91C1C | 6.47 | ✅ |
+| `due-calm-text` #0369A1 | `due-calm-soft` / `card` | 5.57 / 5.93 | ✅ |
+| `due-warning-text` #B45309 | `due-warning-soft` / `card` | 4.84 / 5.02 | ✅ |
+| `due-overdue-text` #B91C1C | `due-overdue-soft` / `card` | 5.91 / 6.47 | ✅ |
+| `due-done-text` #475569 | `due-done-soft` / `card` | 6.92 / 7.58 | ✅ |
+
+**Failing pairs: never use these for text** (these are why the `-text` shades and `ink-soft` exist)
+
+| Text | Background | Ratio |
 |---|---|---|
-| `type-feature` | `<TODO>` | Cards tagged `feature` (accent stripe + icon) |
-| `type-bug` | `<TODO>` | Cards tagged `bug` (accent stripe + icon) |
+| `muted` #64748B | `muted-bg` #F1F5F9 | 4.34 ❌ |
+| `muted` #64748B | `feature-soft` / `bug-soft` / `due-calm-soft` / `due-done-soft` / `due-overdue-soft` | 4.34 / 4.33 / 4.46 / 4.34 / 4.35 ❌ |
+| `success` #16A34A | `card` / `success-soft` | 3.30 / 3.15 ❌ |
+| white | `success` #16A34A | 3.30 ❌ |
+| `danger` #DC2626 | `danger-soft` | 4.41 ❌ |
+| `bug` #E11D48 | `bug-soft` | 4.28 ❌ |
+| `due-calm` #0EA5E9 | `card` | 2.77 ❌ |
+| `due-warning` #D97706 | `card` | 3.19 ❌ |
+| `due-done` #94A3B8 | `card` | 2.56 ❌ |
 
-### Due-date states (M8 `due-tint`)
-
-| Token | Hex | When used |
-|---|---|---|
-| `due-safe` | `<TODO>` | More than 2 days out |
-| `due-warning` | `<TODO>` | Less than 24 hours |
-| `due-overdue` | `<TODO>` | Past due |
-| `due-neutral` | `<TODO>` | Done (overrides date) |
+**Non-text graphics (3:1).** The `success` dot and Done column accent pass at 3.30:1 on `card` and 3.15:1 on `surface`. `line` (1.23:1) and the `due-calm` / `due-done` left borders (2.77 / 2.56:1) are below 3:1. That's acceptable because they're decorative: borders aren't the only way to identify a card, and due state is always repeated in the date label and icon. Input borders must still show a `brand` focus ring (5.17:1).
 
 ## 3. Typography
 
-| Role | Font | Why |
-|---|---|---|
-| Heading | `<TODO>` | `<TODO one sentence>` |
-| Body | `<TODO>` | `<TODO one sentence>` |
-| Monospace (tags, badges, code) | `<TODO>` | `<TODO one sentence>` |
+Loaded from Google Fonts in `index.html`.
 
-Suggested sizes (override only if the design demands it):
+| Role | Font | Token | Why |
+|---|---|---|---|
+| Heading | Inter (600 / 700) | `font-sans` | Neutral and highly legible at small sizes, so it stays quiet and lets the content lead. |
+| Body | Inter (400 / 500) | `font-sans` | One family for the whole UI keeps the board calm and consistent. |
+| Monospace (task IDs, Context field) | JetBrains Mono (400 / 500) | `font-mono` | Marks machine-ish content (IDs, prompts) as different from UI text, and keeps pasted prompts and code readable. |
+
+Sizes:
 
 - Page title: 24 px / semibold
 - Section header: 16 px / semibold uppercase
 - Card title: 14 px / medium
 - Body: 14 px / regular
-- Caption: 12 px / regular muted
+- Caption: 12 px / regular, `muted` (or `ink-soft` on `muted-bg` and tints)
 
 ## 4. Component principles
 
-One short sentence per element. These set the tone for the build phase — Person A's modal and Person B's anchor board should both feel like they came from this doc.
-
-- **Cards:** `<TODO>` (e.g. "Light, almost weightless; the only weight is from a 1px border, no shadow except on hover.")
-- **Buttons:** `<TODO>` (e.g. "Solid fill, no gradient, generous padding, rounded-md.")
-- **Modal:** `<TODO>` (e.g. "Centered, max-width-md, slate-900 backdrop at 50% opacity.")
-- **Empty states:** `<TODO>` (e.g. "Dashed border, muted text, never sad.")
-- **Drag affordance (if used):** `<TODO>` (e.g. "None — we use a status dropdown.")
+Cards are white with a 1px `line` border, the 6 px theme radius, and a soft shadow that only appears on hover. They gain a coloured left border and tint only when their due date has something to say. Buttons are solid `brand` with white text, `rounded`, and generous padding; secondary actions are plain text links, so there is only ever one loud button on screen, and the only red button is "Delete task" with its trash icon. The modal is centred, `max-w-lg`, on a `ink` backdrop at 40% opacity, with the Context field set in JetBrains Mono so prompts read like the code they produce, and form errors appear inline under the field in `danger-text` with an alert icon. Columns sit on `muted-bg`. Empty columns use a dashed `line` border with a short `ink-soft` line of encouragement, and status changes go through a dropdown (no drag-and-drop), so moving a task is always one deliberate click.
 
 ## 5. Voice / microcopy
 
-Three lines of microcopy that capture the tone of the product. Keep it short — these are the words a stressed user reads at 11pm.
+Calm, short, second person. No exclamation marks unless something is actually wrong.
 
 | Where | Text |
 |---|---|
-| "+" button label | `<TODO>` (e.g. "+ Task" or "Add task" or "New") |
-| Empty column placeholder | `<TODO>` (e.g. "Nothing here yet — keep going.") |
-| Toast after "Copy as Prompt Context" | `<TODO>` (e.g. "Copied. Now paste it into the AI.") |
-| Confirm-delete message | `<TODO>` (e.g. "Delete this task? You can't undo.") |
-| Handoff toast (M7 `task-owner`) | `<TODO>` (e.g. "Handed off to {name}. They've got it.") |
+| "+" button label | "+ New task" |
+| Empty column placeholder | "Nothing here. Enjoy the quiet." |
+| Toast after "Copy as Prompt Context" (success) | "Context copied. Paste it into your AI tool." |
+| Confirm-delete message (danger) | "Delete this task and its prompt history? This can't be undone." |
+| Handoff toast (M7 `task-owner`, success) | "Handed to {name}. It's on their board now." |
+| Form error: missing title (danger) | "Give this task a title." |
+| Deliverable slot: filled / empty | "Added" / "Not added yet" |
 
 ## 6. Logo / wordmark
 
-The tracker probably doesn't need a logo, but it does need a name and a wordmark style.
-
-- **Product name:** `<TODO>` (match PRD §11 team identity)
-- **Wordmark style:** `<TODO>` (e.g. "Just the name in the heading font, brand-primary color, no icon.")
+- **Product name:** `<TODO>`
+- **Wordmark style:** The product name in Inter semibold, `ink`, with a small `brand` dot before it. No icon.
 
 ## 7. Out of scope (this hackathon)
 
-To keep design tight, the following are explicitly not part of `design-done`:
-
-- A dark mode toggle. Pick one mode and ship it.
+- A dark mode toggle. Light mode only.
 - Multiple themes. One brand, applied consistently.
 - Animations beyond a 200 ms fade on toast notifications.
-- A custom icon set. Use [Lucide icons](https://lucide.dev) via Tailwind classes if you need any.
+- A custom icon set. Use [Lucide icons](https://lucide.dev) if needed.
 
 ---
 
-*DESIGN.md version: hackathon-starter v1*
+*DESIGN.md version: hackathon-starter v1 · filled in for M3 · base palette from tweakcn.com/community (translated to Tailwind v3)*
