@@ -109,7 +109,7 @@ export default function ContextSection({ values, onChange, updatedAt, dirty }) {
                 <Copy aria-hidden="true" className="h-3.5 w-3.5" />
               )}
               {copyState === 'copied' ? 'Copied!' : 'Copy'}
-              <span className="sr-only"> context</span>
+              <span className="sr-only"> Context box text</span>
             </button>
           </div>
         </div>

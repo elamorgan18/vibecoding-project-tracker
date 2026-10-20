@@ -235,3 +235,45 @@ Fill in at least one mock task's context so it's visible. Fill in the factual se
 ````
 
 **Summary:** Added `ContextSection.jsx`, `MarkdownPreview.jsx` (`react-markdown` + `remark-gfm`), `src/data/context.js` and `src/utils/clipboard.js`. Added `timeAgo` to `dates.js`, and made `useLocalStorage.js` report write errors. Updated `TaskModal.jsx`, `App.jsx` (`contextUpdatedAt`, synchronous save with storage-full alert, page banner), `Dialog.jsx`, `FormField.jsx`, `model.js`, `seed.js` (context for vt-2 / vt-3) and the `DESIGN.md` microcopy. Renamed `docs/decisions/M9-context.md` to `M9-task-context.md` and filled it in. Tested in jsdom (133/133 passed).
+
+## M10 – copy-prompt
+
+### 2026-10-20 13:33 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+M10: A copy button may already exist from M9. Check the current implementation against these requirements and only change what's missing: a "Copy Context" button on every card AND in the modal; it copies a Markdown block with title, type, status, description, full Context, AI tool, outcome and AI problems (skipping empty fields); formatted as a natural briefing for an AI chat; shows a "Copied to clipboard!" toast; clicking it on a card doesn't open the modal. Tell me what was already there and what you changed. Fill in the factual sections of docs/decisions/M10-copy-context.md.
+````
+
+**Summary:** Kept M9's raw-text Copy button and clipboard helper. Added `src/data/briefing.js` (`buildBriefing`) and `CopyContextButton.jsx`, placed on every card above the click target (`TaskCard`/`Column`/`Board`) and in the modal header (`TaskModal`). Added a danger tone to `Toast.jsx` and `handleCopyContext` with a "Copied to clipboard!" toast in `App.jsx`. Updated the `DESIGN.md` microcopy and renamed `docs/decisions/M10-copy-prompt.md` to `M10-copy-context.md` and filled it in. Tested in jsdom (154/154 passed).
+
+## M7 – task-owner (update)
+
+### 2026-10-20 13:38 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Rename the "Who's driving what" strip to "Team members". Update the heading text, any aria-labels, and any references in DESIGN.md microcopy so the wording is consistent everywhere. Don't change how the strip works. Note the change in docs/decisions/M7-task-owner.md (factual sections only).
+````
+
+**Summary:** Changed the strip heading to "Team members" and its `aria-labelledby` id to `team-members-heading`. Renamed `src/components/DrivingStrip.jsx` to `TeamMembersStrip.jsx` and updated `src/App.jsx`. Updated the `DESIGN.md` §5 microcopy row and noted the rename in `docs/decisions/M7-task-owner.md`. Behaviour unchanged; tested in jsdom (155/155 passed).
+
+## Accessibility audit – typography
+
+### 2026-10-20 13:40 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Accessibility audit of typography. Don't change anything yet; report back in a table: every text style used (headings, card title, card meta, badges, chips, toasts, modal labels, context textarea, legend), its font, size in px and rem, weight and line-height, and the contrast ratio of its text colour against the background it appears on (including the feature/bug tints and due chips). Flag anything under 16px for body text, under 12px for any text, fixed px font sizes instead of rem, line-height under 1.4 for body text, and contrast under 4.5:1 (or 3:1 for large text). Then suggest fixes.
+````
+
+**Summary:** Audit only; no app or design files changed. Inventoried every text style in `src/components/*.jsx`, `src/App.jsx`, `src/index.css` and `tailwind.config.js` and computed WCAG contrast for each pair. Reported findings and suggested fixes in the chat. Only `PROMPT_LOG.md` changed (this entry).

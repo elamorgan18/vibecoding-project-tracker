@@ -42,6 +42,15 @@
   - All M5/M6 checks still pass, with no React warnings.
 - `npm run build` passes, and the Vite dev server on port 5173 serves and compiles all new modules.
 
+### Rename (2026-10-20 13:38): "Who's driving what" → "Team members"
+
+- **Strip heading:** changed from "Who's driving what" to **"Team members"**.
+- **Accessible name:** the section's `aria-labelledby` / heading id changed from `driving-heading` to `team-members-heading`, so screen readers announce "Team members".
+- **Component:** renamed from `DrivingStrip` (`src/components/DrivingStrip.jsx`) to `TeamMembersStrip` (`src/components/TeamMembersStrip.jsx`). The import, usage and file-map comment in `src/App.jsx` were updated to match.
+- **DESIGN.md §5:** the microcopy row now reads "Team members strip (M7): heading / empty member | 'Team members' / 'Nothing in progress'".
+- **Behaviour unchanged:** one card per member, their In Progress tasks, task buttons open the modal, sideways scroll. The subtitle "Tasks each person has In Progress." and the per-member text ("Driving 1 task" / "Nothing in progress") were not changed.
+- **Tested:** 155/155 checks passed in jsdom. A new check confirms the heading text, the `aria-labelledby` id, and that "Who's driving what" no longer appears. All existing strip checks pass against the new selector.
+
 ### Bug fix (2026-10-20 12:43): card focus / selected ring
 
 - **Bug:** when a card was clicked or keyboard-focused, it showed a purple-looking border whatever its type.
@@ -65,7 +74,7 @@
 |---|---|
 | `src/components/Avatar.jsx` | New. Initials avatar (`sm` 24 px / `md` 32 px) and dashed unassigned placeholder; `initials()` helper |
 | `src/components/Toast.jsx` | New. Success toast with live region, 4 s auto-dismiss, Dismiss button |
-| `src/components/DrivingStrip.jsx` | New. "Who's driving what" strip |
+| `src/components/DrivingStrip.jsx` (now `TeamMembersStrip.jsx`) | New. "Who's driving what" strip. Renamed 2026-10-20 to `TeamMembersStrip` with heading "Team members" |
 | `src/components/TeamPanel.jsx` | New. Team dialog: member list, inline remove confirmation, add-member form with validation |
 | `src/components/Dialog.jsx` | New. Shared modal shell (extracted from `TaskModal`) |
 | `src/components/FormField.jsx` | New. Shared label + control + error, `inputClass`, `inputBorder()` |

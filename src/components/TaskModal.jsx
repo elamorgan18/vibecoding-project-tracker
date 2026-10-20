@@ -5,6 +5,7 @@ import { dueState } from '../data/due.js';
 import { STAGES, TASK_TYPES } from '../data/model.js';
 import Avatar from './Avatar.jsx';
 import ContextSection from './ContextSection.jsx';
+import CopyContextButton from './CopyContextButton.jsx';
 import Dialog from './Dialog.jsx';
 import DueChip from './DueChip.jsx';
 import FormField, { inputBorder, inputClass } from './FormField.jsx';
@@ -27,7 +28,7 @@ const EMPTY_FORM = {
  * `saveError` (set by the parent when storage is full) is shown above the
  * footer; the form keeps everything typed so nothing is lost.
  */
-export default function TaskModal({ task, members, onSave, onDelete, onHandOff, onClose, saveError }) {
+export default function TaskModal({ task, members, onSave, onDelete, onHandOff, onCopyContext, onClose, saveError }) {
   const isEdit = task != null;
   const [form, setForm] = useState(() =>
     isEdit
@@ -104,14 +105,18 @@ export default function TaskModal({ task, members, onSave, onDelete, onHandOff, 
             </p>
           )}
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded p-1 text-ink-soft hover:bg-card hover:text-ink focus:outline-none focus:ring-2 focus:ring-brand"
-        >
-          <X aria-hidden="true" className="h-5 w-5" />
-          <span className="sr-only">Close</span>
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          {/* Copies the briefing from what's in the form now, unsaved edits included. */}
+          <CopyContextButton onClick={() => onCopyContext({ ...task, ...form })} />
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded p-1 text-ink-soft hover:bg-card hover:text-ink focus:outline-none focus:ring-2 focus:ring-brand"
+          >
+            <X aria-hidden="true" className="h-5 w-5" />
+            <span className="sr-only">Close</span>
+          </button>
+        </div>
       </header>
 
       <form onSubmit={handleSubmit} noValidate>

@@ -1,12 +1,12 @@
 import Avatar from './Avatar.jsx';
 
 /** One card per team member showing the tasks they have In Progress. */
-export default function DrivingStrip({ members, tasks, onOpenTask }) {
+export default function TeamMembersStrip({ members, tasks, onOpenTask }) {
   return (
-    <section aria-labelledby="driving-heading" className="mb-6">
+    <section aria-labelledby="team-members-heading" className="mb-6">
       <div className="mb-2 flex flex-wrap items-baseline gap-x-3">
-        <h2 id="driving-heading" className="text-base font-semibold uppercase tracking-wide text-ink">
-          Who's driving what
+        <h2 id="team-members-heading" className="text-base font-semibold uppercase tracking-wide text-ink">
+          Team members
         </h2>
         <p className="text-sm text-muted">Tasks each person has In Progress.</p>
       </div>

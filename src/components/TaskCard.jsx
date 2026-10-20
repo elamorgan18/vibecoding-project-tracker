@@ -1,5 +1,6 @@
 import { dueState } from '../data/due.js';
 import Avatar from './Avatar.jsx';
+import CopyContextButton from './CopyContextButton.jsx';
 import DueChip, { DUE_META } from './DueChip.jsx';
 import TypeBadge, { TYPE_META } from './TypeBadge.jsx';
 
@@ -10,7 +11,9 @@ import TypeBadge, { TYPE_META } from './TypeBadge.jsx';
  *   - Due state (when there is a due date): a 4px LEFT border in the due
  *     colour plus a due-date chip with icon and text. It never touches the
  *     background, which belongs to the type.
- *   - Owner: initials avatar and name along the bottom.
+ *   - Owner: initials avatar and name along the bottom, next to the
+ *     "Copy Context" button (M10), which sits above the click target so
+ *     it copies without opening the modal.
  * Captions use `ink-soft` because `muted` fails AA on the type tints.
  * The title is a button stretched over the whole card, so clicking anywhere
  * on the card opens it for editing.
@@ -22,7 +25,7 @@ import TypeBadge, { TYPE_META } from './TypeBadge.jsx';
 const FOCUS_RING =
   'focus-within:ring-2 focus-within:ring-brand focus-within:ring-offset-2 focus-within:ring-offset-muted-bg';
 
-export default function TaskCard({ task, member, onOpen }) {
+export default function TaskCard({ task, member, onOpen, onCopyContext }) {
   const due = dueState(task);
 
   return (
@@ -51,13 +54,16 @@ export default function TaskCard({ task, member, onOpen }) {
         </div>
       )}
 
-      <div className="mt-3 flex items-center gap-2">
-        <Avatar member={member} />
-        {member ? (
-          <span className="text-sm font-medium text-ink">{member.name}</span>
-        ) : (
-          <span className="text-sm text-ink-soft">Unassigned</span>
-        )}
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <Avatar member={member} />
+          {member ? (
+            <span className="truncate text-sm font-medium text-ink">{member.name}</span>
+          ) : (
+            <span className="text-sm text-ink-soft">Unassigned</span>
+          )}
+        </div>
+        <CopyContextButton onClick={() => onCopyContext(task)} taskTitle={task.title} />
       </div>
     </article>
   );

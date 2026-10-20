@@ -1,11 +1,17 @@
 import { useEffect } from 'react';
-import { CircleCheck, X } from 'lucide-react';
+import { CircleCheck, TriangleAlert, X } from 'lucide-react';
 
 const DURATION_MS = 4000;
 
+const TONES = {
+  success: { Icon: CircleCheck, box: 'border-success bg-success-soft', icon: 'text-success' },
+  danger: { Icon: TriangleAlert, box: 'border-danger bg-danger-soft', icon: 'text-danger' },
+};
+
 /**
- * Success toast (DESIGN.md §2.2): `success-soft` background, check icon, text.
- * The live region is always rendered so screen readers announce new messages.
+ * Toast (DESIGN.md §2.2): `success` (default) or `danger` tone, always with
+ * an icon and text. The live region is always rendered so screen readers
+ * announce new messages.
  */
 export default function Toast({ toast, onDismiss }) {
   useEffect(() => {
@@ -13,6 +19,8 @@ export default function Toast({ toast, onDismiss }) {
     const timer = setTimeout(onDismiss, DURATION_MS);
     return () => clearTimeout(timer);
   }, [toast?.id]);
+
+  const tone = TONES[toast?.tone ?? 'success'];
 
   return (
     <div
@@ -23,9 +31,9 @@ export default function Toast({ toast, onDismiss }) {
       {toast && (
         <div
           key={toast.id}
-          className="pointer-events-auto flex animate-toast-in items-center gap-2 rounded border border-success bg-success-soft py-3 pl-4 pr-2 text-sm text-ink shadow-lg motion-reduce:animate-none"
+          className={`pointer-events-auto flex animate-toast-in items-center gap-2 rounded border py-3 pl-4 pr-2 text-sm text-ink shadow-lg motion-reduce:animate-none ${tone.box}`}
         >
-          <CircleCheck aria-hidden="true" className="h-4 w-4 shrink-0 text-success" />
+          <tone.Icon aria-hidden="true" className={`h-4 w-4 shrink-0 ${tone.icon}`} />
           <span>{toast.message}</span>
           <button
             type="button"

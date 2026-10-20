@@ -181,13 +181,13 @@ Calm, short, second person. No exclamation marks unless something is actually wr
 |---|---|
 | "+" button label | "+ New task" |
 | Empty column placeholder | "Nothing here. Enjoy the quiet." |
-| Toast after "Copy as Prompt Context" (success) | "Context copied. Paste it into your AI tool." |
+| Toast after "Copy Context" (M10, success) | "Copied to clipboard!" (copy failed, danger: "Couldn't copy. Your browser blocked the clipboard.") |
 | Confirm-delete message (danger) | "Delete this task and its prompt history? This can't be undone." |
 | Handoff toast (M7 `task-owner`, success) | "Handed to {name}. It's on their board now." |
 | Form error: missing title (danger) | "Give this task a title." |
 | Deliverable slot: filled / empty | "Added" / "Not added yet" |
 | Hand-off dropdown placeholder (M7) | "Hand off to…" |
-| Driving strip (M7): heading / empty member | "Who's driving what" / "Nothing in progress" |
+| Team members strip (M7): heading / empty member | "Team members" / "Nothing in progress" |
 | Team panel: add / remove toasts (success) | "Added {name} to the team." / "Removed {name} from the team." |
 | Team panel: remove confirm (danger) | "Remove {name} from the team? Their {n} tasks will become unassigned." |
 | Context box (M9): copy button / confirmation | "Copy" / "Copied!" |

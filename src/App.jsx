@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AlertTriangle, Plus, Users } from 'lucide-react';
+import { buildBriefing } from './data/briefing.js';
 import { contextChanged, contextValues, NEW_TASK_CONTEXT } from './data/context.js';
 import { STORAGE_KEYS } from './data/model.js';
 import { SEED_TEAMS, SEED_PROJECTS, SEED_TASKS } from './data/seed.js';
@@ -7,8 +8,9 @@ import { todayISO } from './data/dates.js';
 import { nextTaskId, reassignTask, removeTask, unassignMember, upsertTask } from './data/tasks.js';
 import { addMember, removeMember } from './data/team.js';
 import { useLocalStorage, writeStorage } from './hooks/useLocalStorage.js';
+import { copyText } from './utils/clipboard.js';
 import Board from './components/Board.jsx';
-import DrivingStrip from './components/DrivingStrip.jsx';
+import TeamMembersStrip from './components/TeamMembersStrip.jsx';
 import DueLegend from './components/DueLegend.jsx';
 import TaskModal from './components/TaskModal.jsx';
 import TeamPanel from './components/TeamPanel.jsx';
@@ -21,7 +23,7 @@ import Toast from './components/Toast.jsx';
  *   src/data/seed.js            mock team, project and tasks for first load
  *   src/data/tasks.js, team.js  pure update helpers
  *   src/hooks/useLocalStorage.js
- *   src/components/             DrivingStrip, Board → Column → TaskCard,
+ *   src/components/             TeamMembersStrip, Board → Column → TaskCard,
  *                               TaskModal, TeamPanel, Toast (+ shared Dialog,
  *                               FormField, Avatar, TypeBadge)
  *
@@ -44,8 +46,17 @@ export default function App() {
   const team = teams.find((t) => t.id === project.teamId);
   const projectTasks = tasks.filter((task) => task.projectId === project.id);
 
-  function showToast(message) {
-    setToast({ id: Date.now(), message });
+  function showToast(message, tone = 'success') {
+    setToast({ id: Date.now(), message, tone });
+  }
+
+  async function handleCopyContext(task) {
+    try {
+      await copyText(buildBriefing(task));
+      showToast('Copied to clipboard!');
+    } catch {
+      showToast("Couldn't copy. Your browser blocked the clipboard.", 'danger');
+    }
   }
 
   function openModal(task) {
@@ -153,11 +164,16 @@ export default function App() {
 
       {/* TODO M11 anchors: render the Anchor Board (Presentation / Demo / Report / Documentation) above the board. */}
 
-      <DrivingStrip members={team.members} tasks={projectTasks} onOpenTask={openModal} />
+      <TeamMembersStrip members={team.members} tasks={projectTasks} onOpenTask={openModal} />
 
       <DueLegend />
 
-      <Board tasks={projectTasks} members={team.members} onOpenTask={openModal} />
+      <Board
+        tasks={projectTasks}
+        members={team.members}
+        onOpenTask={openModal}
+        onCopyContext={handleCopyContext}
+      />
 
       {modal && (
         <TaskModal
@@ -167,6 +183,7 @@ export default function App() {
           onSave={handleSave}
           onDelete={handleDelete}
           onHandOff={handleHandOff}
+          onCopyContext={handleCopyContext}
           onClose={closeModal}
           saveError={saveError}
         />
