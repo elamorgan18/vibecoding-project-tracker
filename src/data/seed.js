@@ -11,6 +11,7 @@
  *   vt-3 overdue (2 days late), vt-4 done (was due 3 days ago).
  */
 
+import { ANCHOR_SLOTS } from './anchors.js';
 import { addDays, todayISO } from './dates.js';
 
 const today = todayISO();
@@ -128,3 +129,9 @@ Waiting on review: check the subject line wording.
     createdDate: addDays(today, -8),
   },
 ];
+
+/**
+ * The four deliverable slots for the project, all empty to start.
+ * @type {import('./model.js').Anchor[]}
+ */
+export const SEED_ANCHORS = ANCHOR_SLOTS.map((slot) => ({ ...slot, projectId: 'project-1', url: null }));

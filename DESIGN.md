@@ -56,7 +56,7 @@ Every hex below is a Tailwind token (see §2.6 for class names). Each meaning co
 How each one is shown. Every use always pairs the colour with an icon **and** text:
 
 - **Confirmation toast:** `success-soft` background, `success` check icon, message in `success-text` or `ink`.
-- **Filled deliverable dot:** solid `success` dot with a check and the label "Added". An empty slot is a dashed `line` circle with "Not added yet" in `muted`.
+- **Linked deliverable (M11):** solid `success` dot with a white check and the label "Linked" in `success-text`. An empty slot is a dashed circle (`circle-dashed`) with "No link yet", both in `muted`.
 - **Done column accent:** `success` top border on the Done column header, a check icon, and the "Done" label.
 - **Delete button:** solid `danger` with white text and a `trash-2` icon ("Delete task"). Hover is `danger-hover`.
 - **Form error:** `danger` input border, `alert-circle` icon, message in `danger-text` below the field.
@@ -217,7 +217,9 @@ Calm, short, second person. No exclamation marks unless something is actually wr
 | Confirm-delete message (danger) | "Delete this task and its prompt history? This can't be undone." |
 | Handoff toast (M7 `task-owner`, success) | "Handed to {name}. It's on their board now." |
 | Form error: missing title (danger) | "Give this task a title." |
-| Deliverable slot: filled / empty | "Added" / "Not added yet" |
+| Deliverable slot (M11): linked / empty | "Linked" / "No link yet" |
+| Deliverables: heading / summary | "Deliverables" / "{n} of 4 linked. Paste each final link here as you produce it." |
+| Deliverable link error: empty / not a link (danger) | "Paste a link first." / "Enter a full link, like https://example.com." |
 | Hand-off dropdown placeholder (M7) | "Hand off to…" |
 | Team members strip (M7): heading / empty member | "Team members" / "Nothing in progress" |
 | Team panel: add / remove toasts (success) | "Added {name} to the team." / "Removed {name} from the team." |

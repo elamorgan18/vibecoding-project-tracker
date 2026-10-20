@@ -3,12 +3,14 @@ import { AlertTriangle, Plus, Users } from 'lucide-react';
 import { buildBriefing } from './data/briefing.js';
 import { contextChanged, contextValues, NEW_TASK_CONTEXT } from './data/context.js';
 import { STORAGE_KEYS } from './data/model.js';
-import { SEED_TEAMS, SEED_PROJECTS, SEED_TASKS } from './data/seed.js';
+import { SEED_TEAMS, SEED_PROJECTS, SEED_TASKS, SEED_ANCHORS } from './data/seed.js';
+import { projectAnchors, setAnchorUrl } from './data/anchors.js';
 import { todayISO } from './data/dates.js';
 import { nextTaskId, reassignTask, removeTask, unassignMember, upsertTask } from './data/tasks.js';
 import { addMember, removeMember, withTeamAvatarColors } from './data/team.js';
 import { useLocalStorage, writeStorage } from './hooks/useLocalStorage.js';
 import { copyText } from './utils/clipboard.js';
+import AnchorBoard from './components/AnchorBoard.jsx';
 import Board from './components/Board.jsx';
 import TeamMembersStrip from './components/TeamMembersStrip.jsx';
 import DueLegend from './components/DueLegend.jsx';
@@ -21,9 +23,9 @@ import Toast from './components/Toast.jsx';
  *
  *   src/data/model.js           Team / Project / Task typedefs, STAGES, storage keys
  *   src/data/seed.js            mock team, project and tasks for first load
- *   src/data/tasks.js, team.js  pure update helpers
+ *   src/data/tasks.js, team.js, anchors.js  pure update helpers
  *   src/hooks/useLocalStorage.js
- *   src/components/             TeamMembersStrip, Board → Column → TaskCard,
+ *   src/components/             AnchorBoard → AnchorCard, TeamMembersStrip, Board → Column → TaskCard,
  *                               TaskModal, TeamPanel, Toast (+ shared Dialog,
  *                               FormField, Avatar, TypeBadge)
  *
@@ -33,7 +35,8 @@ export default function App() {
   const [teams, setTeams, teamsError] = useLocalStorage(STORAGE_KEYS.teams, SEED_TEAMS);
   const [projects] = useLocalStorage(STORAGE_KEYS.projects, SEED_PROJECTS);
   const [tasks, setTasks, tasksError] = useLocalStorage(STORAGE_KEYS.tasks, SEED_TASKS);
-  const storageError = tasksError ?? teamsError;
+  const [anchors, setAnchors, anchorsError] = useLocalStorage(STORAGE_KEYS.anchors, SEED_ANCHORS);
+  const storageError = tasksError ?? teamsError ?? anchorsError;
 
   // Members saved before avatar colours existed get one (once, then stored).
   useEffect(() => {
@@ -121,8 +124,9 @@ export default function App() {
     showToast(`Removed ${member.name} from the team.`);
   }
 
-  // TODO M11 anchors:
-  //   const [anchors, setAnchors] = useLocalStorage('vibetracker.anchors', [...]);
+  function handleSaveAnchor(anchorId, url) {
+    setAnchors((all) => setAnchorUrl(all, project.id, anchorId, url));
+  }
 
   return (
     <div className="min-h-screen bg-surface p-6 font-sans text-ink">
@@ -168,7 +172,7 @@ export default function App() {
         </div>
       )}
 
-      {/* TODO M11 anchors: render the Anchor Board (Presentation / Demo / Report / Documentation) above the board. */}
+      <AnchorBoard anchors={projectAnchors(anchors, project.id)} onSave={handleSaveAnchor} />
 
       <TeamMembersStrip members={team.members} tasks={projectTasks} onOpenTask={openModal} />
 

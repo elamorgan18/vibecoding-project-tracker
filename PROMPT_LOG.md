@@ -325,3 +325,17 @@ Tell me which cause it was. Then confirm the colours appear on cards, the Team m
 ````
 
 **Summary:** No code changes. Neither cause applied: `Avatar.jsx` already uses literal class names, and `App.jsx`/`team.js` already migrate members without a colour. The real cause was two Vite dev servers (ports 5173/5174) started before the avatar colours were added to `tailwind.config.js`; they kept serving CSS with no `bg-avatar-*` classes. A fresh dev server serves all 8 classes. A headless Edge test with colourless old data showed correct colours on cards, the Team members strip, the team panel and the modal, and confirmed tasks/projects were unchanged.
+
+## M11 – project-deliverables
+
+### 2026-10-20 14:13 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+M11: Pin four cards above the board: Presentation, Demo, Report, Documentation. Each has a label, one URL input and a status indicator that changes when a link is saved. Pair the status with an icon and text (e.g. empty circle + "No link yet" / check + "Linked"), so it doesn't rely on colour alone. Validate that the input is a URL and show a 14px error message if not. Once saved, the link is clickable and opens in a new tab. Links persist across reloads. On narrow screens the four cards wrap neatly. Fill in the factual sections of docs/decisions/M11-project-deliverables.md.
+````
+
+**Summary:** Added a "Deliverables" section above the board (`AnchorBoard.jsx`, `AnchorCard.jsx`). It has four cards with an icon + text status, URL validation that accepts only http(s) links (`src/data/anchors.js`), a 14px inline error, a new-tab link with Change/Remove, and a 1/2/4-column grid. The anchors are stored in localStorage with a `projectId` (`App.jsx`, `model.js`, `seed.js`). Updated the `DESIGN.md` microcopy and filled in `docs/decisions/M11-project-deliverables.md`. Tested in headless Edge (36/36 passed, 320–1440px) and `npm run build` passes.

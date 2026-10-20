@@ -1,7 +1,7 @@
 /**
  * Data model for the tracker.
  *
- * Shape: Team 1─* Project 1─* Task. There is one team and one project for now,
+ * Shape: Team 1─* Project 1─* Task (and Project 1─4 Anchor). There is one team and one project for now,
  * but tasks point at a project and projects point at a team, so more of each
  * can be added later without reshaping stored data.
  */
@@ -28,6 +28,15 @@
  * @property {string} id
  * @property {string} teamId     Team.id
  * @property {string} name
+ */
+
+/**
+ * One of four pinned deliverable links per project (M11), shown above the board.
+ * @typedef {Object} Anchor
+ * @property {'presentation'|'demo'|'report'|'documentation'} id   unique within a project
+ * @property {string} projectId     Project.id
+ * @property {string} label         human-readable, e.g. 'Presentation'
+ * @property {string|null} url      an http(s) link, or null until one is saved
  */
 
 /**
@@ -66,4 +75,5 @@ export const STORAGE_KEYS = {
   teams: 'vibetracker.teams',
   projects: 'vibetracker.projects',
   tasks: 'vibetracker.tasks',
+  anchors: 'vibetracker.anchors',
 };
