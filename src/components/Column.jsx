@@ -5,7 +5,7 @@ import TaskCard from './TaskCard.jsx';
  * One board column. The Done column gets the success accent (DESIGN.md §2.2):
  * a green top border plus a check icon next to its label.
  */
-export default function Column({ stage, tasks, membersById }) {
+export default function Column({ stage, tasks, membersById, onOpenTask }) {
   const isDone = stage.id === 'done';
 
   return (
@@ -37,7 +37,7 @@ export default function Column({ stage, tasks, membersById }) {
         <ul className="flex flex-col gap-2">
           {tasks.map((task) => (
             <li key={task.id}>
-              <TaskCard task={task} member={membersById[task.assignee]} />
+              <TaskCard task={task} member={membersById[task.assignee]} onOpen={onOpenTask} />
             </li>
           ))}
         </ul>

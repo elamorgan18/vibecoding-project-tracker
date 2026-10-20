@@ -2,7 +2,7 @@ import { STAGES } from '../data/model.js';
 import Column from './Column.jsx';
 
 /** The four-column Kanban board for one project. */
-export default function Board({ tasks, members }) {
+export default function Board({ tasks, members, onOpenTask }) {
   const membersById = Object.fromEntries(members.map((m) => [m.id, m]));
 
   return (
@@ -13,6 +13,7 @@ export default function Board({ tasks, members }) {
           stage={stage}
           tasks={tasks.filter((task) => task.status === stage.id)}
           membersById={membersById}
+          onOpenTask={onOpenTask}
         />
       ))}
     </main>

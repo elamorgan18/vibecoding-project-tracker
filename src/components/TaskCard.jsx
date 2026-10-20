@@ -11,13 +11,23 @@ function initials(name) {
 
 /**
  * One task on the board. Shows the task ID, title and assignee.
+ * The title is a button stretched over the whole card, so clicking anywhere
+ * on the card opens it for editing.
  * Type badge (M6) and due-date tint (M8) are added in later milestones.
  */
-export default function TaskCard({ task, member }) {
+export default function TaskCard({ task, member, onOpen }) {
   return (
-    <article className="rounded border border-line bg-card p-3 transition-shadow hover:shadow-md">
+    <article className="relative rounded border border-line bg-card p-3 transition-shadow focus-within:ring-2 focus-within:ring-brand hover:shadow-md">
       <p className="font-mono text-xs text-muted">{task.id}</p>
-      <h3 className="mt-1 text-sm font-medium text-ink">{task.title}</h3>
+      <h3 className="mt-1 text-sm font-medium text-ink">
+        <button
+          type="button"
+          onClick={() => onOpen(task)}
+          className="text-left after:absolute after:inset-0 after:rounded after:content-[''] focus:outline-none"
+        >
+          {task.title}
+        </button>
+      </h3>
 
       <div className="mt-3 flex items-center gap-2">
         {member ? (

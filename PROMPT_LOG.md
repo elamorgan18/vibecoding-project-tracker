@@ -137,3 +137,17 @@ M4: Task fields: id, title, description, type (feature/bug), status, assignee, d
 ````
 
 **Summary:** Added the Team/Project/Task model (`src/data/model.js`), mock data (`src/data/seed.js`) and the moved `src/hooks/useLocalStorage.js`. Added the board components (`Board`, `Column`, `TaskCard`), rewrote `src/App.jsx` and added `lucide-react`. Verified with build, the running dev server and a render check, then filled in `docs/decisions/M4-data-model.md` and updated file paths in `CLAUDE.md`.
+
+## M5 – crud-modal
+
+### 2026-10-20 12:17 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+M5: Add a "+" button that opens a modal with every task field. Clicking a card opens the same modal in edit mode, pre-filled. Add a Delete button. Status is a dropdown in the modal (no drag-and-drop yet). Persist everything to localStorage so it survives closing and reopening the browser. Test create, edit, delete and reload. Fill in the factual sections of docs/decisions/M5-crud-modal.md.
+````
+
+**Summary:** Added `src/components/TaskModal.jsx` (create/edit form, title validation, inline delete confirmation, focus handling) and `src/data/tasks.js` (ID/date/upsert/remove helpers). Wired it into `src/App.jsx`, made cards clickable (`TaskCard.jsx`, `Column.jsx`, `Board.jsx`), tested create/edit/delete/reload in jsdom (23/23 passed), and filled in `docs/decisions/M5-crud-modal.md`.
