@@ -3,7 +3,7 @@ import { AlertTriangle, Plus, Users } from 'lucide-react';
 import { buildBriefing } from './data/briefing.js';
 import { hasFilters, matchesFilters, NO_FILTERS } from './data/filters.js';
 import { contextChanged, contextValues, NEW_TASK_CONTEXT } from './data/context.js';
-import { STORAGE_KEYS } from './data/model.js';
+import { STAGES, STORAGE_KEYS } from './data/model.js';
 import { SEED_TEAMS, SEED_PROJECTS, SEED_TASKS, SEED_ANCHORS } from './data/seed.js';
 import { projectAnchors, setAnchorUrl } from './data/anchors.js';
 import { todayISO } from './data/dates.js';
@@ -64,8 +64,15 @@ export default function App() {
   // 'board' | 'insights' (ViewSwitch in the header). For this visit only.
   const [view, setView] = useState('board');
   const [toast, setToast] = useState(null);
+  // Screen-reader-only announcement for changes that have no visible toast
+  // (task saved, created, moved, deleted).
+  const [announcement, setAnnouncement] = useState(null);
   // Board filters (FilterBar). Kept for this visit only, not saved.
   const [filters, setFilters] = useState(NO_FILTERS);
+
+  useEffect(() => {
+    document.title = `${view === 'insights' ? 'Insights' : 'Board'} – Vibecoding Project Tracker`;
+  }, [view]);
 
   // One team, one project for now. A project switcher can replace this later.
   const project = projects[0];
@@ -75,6 +82,22 @@ export default function App() {
 
   function showToast(message, tone = 'success') {
     setToast({ id: Date.now(), message, tone });
+  }
+
+  function announce(message) {
+    setAnnouncement({ id: Date.now(), message });
+  }
+
+  // The title / logo in the header: back to the board, closing any dialog first.
+  function goToBoard() {
+    closeModal();
+    setTeamOpen(false);
+    setView('board');
+  }
+
+  function skipToMain(e) {
+    e.preventDefault();
+    document.getElementById('main')?.focus();
   }
 
   async function handleCopyContext(task) {
@@ -116,11 +139,18 @@ export default function App() {
     }
     setTasks(next);
     closeModal();
+
+    const stage = STAGES.find((s) => s.id === task.status).label;
+    if (!existing) announce(`Created task: ${task.title}, in ${stage}.`);
+    else if (existing.status !== task.status) announce(`Saved task: ${task.title}. Moved to ${stage}.`);
+    else announce(`Saved task: ${task.title}.`);
   }
 
   function handleDelete(id) {
+    const task = tasks.find((t) => t.id === id);
     setTasks((all) => removeTask(all, id));
     closeModal();
+    announce(`Deleted task: ${task.title}.`);
   }
 
   function handleHandOff(taskId, memberId) {
@@ -153,18 +183,36 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-surface p-6 font-sans text-ink">
+      {/* Off-screen until focused (the first Tab on the page). */}
+      <a
+        href="#main"
+        onClick={skipToMain}
+        className="sr-only focus:not-sr-only focus:absolute focus:left-6 focus:top-2 focus:z-[70] focus:rounded focus:border focus:border-line focus:bg-card focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-ink focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand"
+      >
+        {view === 'insights' ? 'Skip to insights' : 'Skip to board'}
+      </a>
+
       <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-semibold text-ink">
-            <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-brand" />
-            Vibecoding Project Tracker
+          <h1 className="flex text-2xl font-semibold text-ink">
+            <button
+              type="button"
+              onClick={goToBoard}
+              aria-label="Vibecoding Project Tracker – go to board"
+              className="flex cursor-pointer items-center gap-2 rounded text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            >
+              <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-brand" />
+              Vibecoding Project Tracker
+            </button>
           </h1>
           <p className="mt-1 text-sm text-muted">
             {team.name} · {project.name}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <ViewSwitch view={view} onChange={setView} />
+          <nav aria-label="Views">
+            <ViewSwitch view={view} onChange={setView} />
+          </nav>
           <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
           <button
             type="button"
@@ -197,34 +245,36 @@ export default function App() {
         </div>
       )}
 
-      {view === 'insights' ? (
-        <Suspense fallback={<p className="text-sm text-muted">Loading insights…</p>}>
-          <Insights tasks={projectTasks} members={team.members} projectName={project.name} isDark={isDark} />
-        </Suspense>
-      ) : (
-        <>
-          <AnchorBoard anchors={projectAnchors(anchors, project.id)} onSave={handleSaveAnchor} />
+      <main id="main" tabIndex={-1} className="focus:outline-none">
+        {view === 'insights' ? (
+          <Suspense fallback={<p className="text-sm text-muted">Loading insights…</p>}>
+            <Insights tasks={projectTasks} members={team.members} projectName={project.name} isDark={isDark} />
+          </Suspense>
+        ) : (
+          <>
+            <AnchorBoard anchors={projectAnchors(anchors, project.id)} onSave={handleSaveAnchor} />
 
-          <TeamMembersStrip members={team.members} tasks={projectTasks} onOpenTask={openModal} />
+            <TeamMembersStrip members={team.members} tasks={projectTasks} onOpenTask={openModal} />
 
-          <FilterBar
-            filters={filters}
-            onChange={setFilters}
-            members={team.members}
-            shownCount={visibleTasks.length}
-            totalCount={projectTasks.length}
-          />
+            <FilterBar
+              filters={filters}
+              onChange={setFilters}
+              members={team.members}
+              shownCount={visibleTasks.length}
+              totalCount={projectTasks.length}
+            />
 
-          <Board
-            tasks={visibleTasks}
-            isFiltered={hasFilters(filters)}
-            members={team.members}
-            onOpenTask={openModal}
-            onCopyContext={handleCopyContext}
-            onMoveTask={handleMoveTask}
-          />
-        </>
-      )}
+            <Board
+              tasks={visibleTasks}
+              isFiltered={hasFilters(filters)}
+              members={team.members}
+              onOpenTask={openModal}
+              onCopyContext={handleCopyContext}
+              onMoveTask={handleMoveTask}
+            />
+          </>
+        )}
+      </main>
 
       {modal && (
         <TaskModal
@@ -252,6 +302,11 @@ export default function App() {
       )}
 
       <Toast toast={toast} onDismiss={() => setToast(null)} />
+
+      <p role="status" aria-live="polite" className="sr-only">
+        {/* A new key each time, so the same message is announced again. */}
+        {announcement && <span key={announcement.id}>{announcement.message}</span>}
+      </p>
     </div>
   );
 }

@@ -152,7 +152,7 @@ export default function Board({ tasks, isFiltered, members, onOpenTask, onCopyCo
       onDragEnd={handleDragEnd}
       onDragCancel={finishDrag}
     >
-      <main className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div id="board" className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {STAGES.map((stage) => (
           <Column
             key={stage.id}
@@ -166,7 +166,7 @@ export default function Board({ tasks, isFiltered, members, onOpenTask, onCopyCo
             onCopyContext={onCopyContext}
           />
         ))}
-      </main>
+      </div>
 
       <DragOverlay dropAnimation={reduceMotion() ? null : undefined}>
         {activeTask && (

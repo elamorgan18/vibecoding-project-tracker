@@ -21,7 +21,7 @@ export default function FormField({ id, label, error, children }) {
       </label>
       {children}
       {error && (
-        <p id={`${id}-error`} className="mt-1 flex items-start gap-1 text-sm text-danger-text">
+        <p id={`${id}-error`} role="alert" className="mt-1 flex items-start gap-1 text-sm text-danger-text">
           <AlertCircle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
           {error}
         </p>

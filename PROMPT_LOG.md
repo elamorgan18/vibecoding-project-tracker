@@ -482,3 +482,47 @@ Lighthouse accessibility dropped from 100 to 96. Failed audits: [paste the faile
 ````
 
 **Summary:** The failed audits weren't pasted, so Lighthouse 13.5.0 was run locally on the production build. The only accessibility failure was `target-size`: the "Driving" task links in `src/components/TeamMembersStrip.jsx` were 16.8px tall. They now have `py-1` (24.8px), with the list gap and top margin reduced so the text sits where it did. Added a meta description to `index.html`. Lighthouse now gives accessibility 100 in light and dark mode and SEO 91; the remaining SEO failure is `robots-txt`, which wasn't changed.
+
+### 2026-10-23 12:37 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Four changes. Do not change the visual design: no new colours, layout, spacing, fonts or visible elements. All fixes must be invisible (ARIA attributes, semantic HTML, alt text, screen-reader-only text, focus handling). The only exceptions:
+- Focus rings may appear on keyboard focus only (:focus-visible).
+- A "Skip to board" link may appear only when it's focused.
+- The logo in part 3 may get a pointer cursor.
+If any fix would need a visible change (e.g. colour contrast or a new button), don't make it. List it in your report and ask me first.
+
+1. Trim the demo data. Reduce the seed to about 12–14 tasks: 3–4 per column, with about 4 team members. Keep enough data for every Insights feature to work:
+- At least 2 AI tools with 3 or more tasks that have a Worked/Partial/Failed outcome, so best/worst AI shows real results.
+- At least 1 tool with fewer than 3 tasks, so "Not enough data yet" shows.
+- A mix of feature and bug tasks, so the suggested AI works for both.
+- Every due-date state (overdue, due soon, calm, done).
+- At least one task with a fully filled-in Context.
+Update "Load demo data" to use this set, and tell me how many tasks each tool has and which will show as best and worst.
+
+2. Insights page accessibility. Check, report, then fix within the rules above:
+- Screen readers: each chart has a text summary that is read out. The chart SVG is either labelled (role="img" with a descriptive aria-label) or hidden (aria-hidden="true") with the summary and table as the alternative. "View as table" produces a real <table> with <th> headers and a caption. Headings are in a logical order. Everything works by keyboard alone.
+- Colour blindness: meaning is never carried by colour alone (outcomes and due-date states need text, pattern or icon as well). Colours stay distinguishable for protanopia, deuteranopia and tritanopia. Text contrast is at least 4.5:1 and chart elements at least 3:1 (WCAG 1.4.1, 1.4.3, 1.4.11), in light and dark mode. Report any failures here rather than changing colours.
+
+3. Make the "Vibe Coding" title and logo in the top left clickable. It always takes the user back to the Kanban board view, as well as the Board button doing that. Use a real button or link with an accessible name (e.g. aria-label="Vibe Coding – go to board"), working with Enter/Space. If a task modal is open, close it first. No visual change apart from a pointer cursor and a focus ring on keyboard focus.
+
+4. Full screen-reader pass across the whole app (Board, Insights, task modal, header, deliverables cards, Load demo data / Reset dialogs):
+- Images: any <img> has meaningful alt text, or alt="" if decorative. Avatars read as the member's name.
+- Icons: decorative SVGs beside a text label have aria-hidden="true". Icon-only buttons (edit, delete, close, copy, drag handle) have an aria-label naming the action and target, e.g. "Delete task: Fix login bug".
+- Cards: each card has a meaningful accessible name, e.g. "Fix login bug, bug, assigned to Sam, overdue". Due-date and outcome states are available as text (screen-reader-only if needed).
+- Structure: each column is a labelled region or list ("To Do, 3 tasks"). Landmarks (header, nav, main) and a logical heading order (one h1, then h2s).
+- Forms: every input, dropdown and textarea in the modal has a label tied to it (visually hidden if there isn't a visible one). Hints and errors are linked with aria-describedby.
+- Modal: role="dialog", aria-modal="true", labelled by its heading. Focus moves in on open, is trapped while open, Escape closes it, and focus returns to the card that opened it.
+- Announcements: "Copied!", saved, deleted and error toasts are announced through an aria-live region.
+- Drag and drop: check a task can be moved between columns without a mouse using existing controls (e.g. the status field in the modal), and that the move is announced. If there's no existing way, report it rather than adding visible UI.
+- Links: deliverables links have descriptive accessible names, not just the raw URL.
+- Page: html lang="en", a descriptive <title>, and a "Skip to board" link that's only visible on focus.
+
+Finish with a report listing everything you checked, everything you changed, and anything you held back because it would change the visuals. Log this in PROMPT_LOG.md.
+````
+
+**Summary:** Demo seed cut to 14 tasks / 4 members (`src/data/seed.js`): best AI Claude 80%, lowest Gemini 33%, Lovable unranked, Cursor suggested for features and Claude for bugs. The header title is now a button back to the board, with a focus-only skip link, `nav` and a single `main`, a per-view `<title>` and a screen-reader-only announcer for saved / moved / deleted tasks (`src/App.jsx`). Accessibility fixes, none visible: full card names (`TaskCard.jsx`), column names with task counts (`Column.jsx`), focus goes back to a card even after it moves column (`Dialog.jsx`, `TaskModal.jsx`), focus handling in the delete / remove prompts (`TaskModal.jsx`, `TeamPanel.jsx`), dialog `<header>`/`<footer>` changed to `div`s, error messages use `role="alert"` (`FormField.jsx`, `AnchorCard.jsx`), plus more specific labels and descriptions (`HandOffMenu.jsx`, `Toast.jsx`, `Board.jsx`, `Insights.jsx`). axe-core reports no violations on the board, modal and Insights, in light and dark mode. Positions of the header and modal are pixel-identical to HEAD. `npm run build` passes.

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AlertTriangle, Trash2, X } from 'lucide-react';
 import { contextChanged, contextValues, NEW_TASK_CONTEXT } from '../data/context.js';
 import { dueState } from '../data/due.js';
@@ -51,6 +51,17 @@ export default function TaskModal({ task, tasks, members, onSave, onDelete, onHa
   const [titleError, setTitleError] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const titleRef = useRef(null);
+  const keepRef = useRef(null);
+  const deleteRef = useRef(null);
+  const confirmWasOpen = useRef(false);
+
+  // Focus follows the inline delete confirmation: "Keep it" when it opens,
+  // back to "Delete task" when it is dismissed, so focus is never lost.
+  useEffect(() => {
+    if (confirmingDelete) keepRef.current?.focus();
+    else if (confirmWasOpen.current) deleteRef.current?.focus();
+    confirmWasOpen.current = confirmingDelete;
+  }, [confirmingDelete]);
 
   const owner = members.find((m) => m.id === form.assignee);
   // Live preview of the card's due chip as the date / status change.
@@ -91,8 +102,16 @@ export default function TaskModal({ task, tasks, members, onSave, onDelete, onHa
   }
 
   return (
-    <Dialog labelledBy="task-modal-title" onClose={onClose} initialFocusRef={titleRef} className="max-w-3xl">
-      <header
+    <Dialog
+      labelledBy="task-modal-title"
+      onClose={onClose}
+      initialFocusRef={titleRef}
+      fallbackFocus={() =>
+        (task && document.querySelector(`[data-task-open="${CSS.escape(task.id)}"]`)) || document.getElementById('main')
+      }
+      className="max-w-3xl"
+    >
+      <div
         className={`flex items-start justify-between rounded-t border-b border-line px-5 py-4 ${TYPE_META[form.type].tint}`}
       >
         <div>
@@ -110,17 +129,17 @@ export default function TaskModal({ task, tasks, members, onSave, onDelete, onHa
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {/* Copies the briefing from what's in the form now, unsaved edits included. */}
-          <CopyContextButton onClick={() => onCopyContext({ ...task, ...form })} />
+          <CopyContextButton onClick={() => onCopyContext({ ...task, ...form })} taskTitle={form.title.trim()} />
           <button
             type="button"
             onClick={onClose}
             className="rounded p-1 text-ink-soft hover:bg-card hover:text-ink focus:outline-none focus:ring-2 focus:ring-brand"
           >
             <X aria-hidden="true" className="h-5 w-5" />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">Close {isEdit ? 'Edit task' : 'New task'}</span>
           </button>
         </div>
-      </header>
+      </div>
 
       <form onSubmit={handleSubmit} noValidate>
         <div className="space-y-4 px-5 py-4">
@@ -128,14 +147,14 @@ export default function TaskModal({ task, tasks, members, onSave, onDelete, onHa
             <div className="flex flex-col gap-3 rounded border border-line bg-surface p-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <Avatar member={owner} />
-                <div>
+                <div id="task-owner">
                   <p className="text-xs text-muted">Owner</p>
-                  <p id="task-owner" className="text-sm font-medium text-ink">
+                  <p className="text-sm font-medium text-ink">
                     {owner ? owner.name : 'Unassigned'}
                   </p>
                 </div>
               </div>
-              <HandOffMenu members={handOffTargets} onSelect={handleHandOff} />
+              <HandOffMenu members={handOffTargets} onSelect={handleHandOff} describedBy="task-owner" />
             </div>
           )}
 
@@ -226,6 +245,7 @@ export default function TaskModal({ task, tasks, members, onSave, onDelete, onHa
                 type="date"
                 value={form.dueDate}
                 onChange={update('dueDate')}
+                aria-describedby={due ? 'task-due-preview' : undefined}
                 className={`${inputClass} border-line`}
               />
               {due && (
@@ -259,14 +279,15 @@ export default function TaskModal({ task, tasks, members, onSave, onDelete, onHa
 
         {confirmingDelete ? (
           <div className="flex flex-col gap-3 border-t border-line bg-danger-soft px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="flex items-start gap-2 text-base text-ink">
+            <p id="task-delete-question" className="flex items-start gap-2 text-base text-ink">
               <AlertTriangle aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-danger" />
               Delete this task and its prompt history? This can't be undone.
             </p>
             <div className="flex shrink-0 items-center gap-3">
               <button
                 type="button"
-                autoFocus
+                ref={keepRef}
+                aria-describedby="task-delete-question"
                 onClick={() => setConfirmingDelete(false)}
                 className="rounded px-2 py-1 text-sm font-medium text-ink-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-brand"
               >
@@ -283,9 +304,10 @@ export default function TaskModal({ task, tasks, members, onSave, onDelete, onHa
             </div>
           </div>
         ) : (
-          <footer className="flex items-center justify-between border-t border-line px-5 py-4">
+          <div className="flex items-center justify-between border-t border-line px-5 py-4">
             {isEdit ? (
               <button
+                ref={deleteRef}
                 type="button"
                 onClick={() => setConfirmingDelete(true)}
                 className="flex items-center gap-1.5 rounded bg-danger px-3 py-2 text-sm font-medium text-on-accent hover:bg-danger-hover focus:outline-none focus:ring-2 focus:ring-danger focus:ring-offset-2"
@@ -311,7 +333,7 @@ export default function TaskModal({ task, tasks, members, onSave, onDelete, onHa
                 {isEdit ? 'Save changes' : 'Create task'}
               </button>
             </div>
-          </footer>
+          </div>
         )}
       </form>
     </Dialog>

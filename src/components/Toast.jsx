@@ -41,7 +41,7 @@ export default function Toast({ toast, onDismiss }) {
             className="rounded p-1 text-ink-soft hover:bg-card hover:text-ink focus:outline-none focus:ring-2 focus:ring-brand"
           >
             <X aria-hidden="true" className="h-4 w-4" />
-            <span className="sr-only">Dismiss</span>
+            <span className="sr-only">Dismiss notification</span>
           </button>
         </div>
       )}

@@ -9,7 +9,7 @@ import Avatar from './Avatar.jsx';
  * Home / End move; Enter / Space picks; Escape closes the menu only; Tab
  * closes it and moves on.
  */
-export default function HandOffMenu({ members, onSelect }) {
+export default function HandOffMenu({ members, onSelect, describedBy }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const buttonRef = useRef(null);
@@ -77,6 +77,7 @@ export default function HandOffMenu({ members, onSelect }) {
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls="task-handoff-list"
+        aria-describedby={describedBy}
         onClick={() => (open ? close() : openMenu())}
         onKeyDown={onButtonKeyDown}
         className="flex w-full items-center gap-2 rounded border border-line bg-card px-3 py-2 text-left text-base text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand disabled:cursor-not-allowed disabled:bg-muted-bg disabled:text-ink-soft"

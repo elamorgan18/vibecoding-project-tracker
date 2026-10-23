@@ -36,7 +36,7 @@ export default function Column({
   return (
     <section
       ref={setNodeRef}
-      aria-labelledby={`column-${stage.id}`}
+      aria-labelledby={`column-${stage.id} column-${stage.id}-count`}
       className={`flex flex-col rounded border-t-4 p-3 transition-colors ${
         isCollapsed ? 'self-start' : 'min-h-[16rem]'
       } ${isDone ? 'border-success' : 'border-transparent'} ${
@@ -52,9 +52,10 @@ export default function Column({
           {stage.label}
         </h2>
         <div className="flex items-center gap-1.5">
-          <span className="rounded-full bg-card px-2 py-0.5 text-xs font-medium text-ink-soft">
+          <span id={`column-${stage.id}-count`} className="rounded-full bg-card px-2 py-0.5 text-xs font-medium text-ink-soft">
+            <span className="sr-only">, </span>
             {tasks.length}
-            <span className="sr-only"> tasks</span>
+            <span className="sr-only"> {tasks.length === 1 ? 'task' : 'tasks'}</span>
           </span>
           <button
             type="button"

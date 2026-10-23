@@ -34,10 +34,22 @@ const LIFTED = 'cursor-grabbing shadow-xl ring-1 ring-brand/30 motion-safe:rotat
 
 export default function TaskCard({ task, member, onOpen, onCopyContext, cardRef, dragHandle, isDragging, isOverlay }) {
   const due = dueState(task);
+  // Read by screen readers for the card's title button (and so the card),
+  // e.g. "Fix login bug, Bug, assigned to Sam Rivera, Overdue by 1 day".
+  const accessibleName = [
+    task.title,
+    TYPE_META[task.type].label,
+    member ? `assigned to ${member.name}` : 'unassigned',
+    due?.state === 'done' ? 'done' : due?.label,
+  ]
+    .filter(Boolean)
+    .join(', ');
+  const titleId = `task-${task.id}-title${isOverlay ? '-overlay' : ''}`;
 
   return (
     <article
       ref={cardRef}
+      aria-labelledby={titleId}
       className={`relative rounded border p-3 transition-shadow hover:shadow-md ${FOCUS_RING} ${TYPE_META[task.type].card} ${
         due ? DUE_META[due.state].border : ''
       } ${isOverlay ? LIFTED : ''} ${isDragging ? 'opacity-40' : ''}`}
@@ -50,6 +62,9 @@ export default function TaskCard({ task, member, onOpen, onCopyContext, cardRef,
         <button
           type="button"
           {...dragHandle}
+          id={titleId}
+          aria-label={accessibleName}
+          data-task-open={isOverlay ? undefined : task.id}
           onClick={() => onOpen?.(task)}
           className={`touch-manipulation text-left after:absolute after:inset-0 after:rounded after:content-[''] focus:outline-none ${
             isOverlay ? 'cursor-grabbing' : 'cursor-grab'

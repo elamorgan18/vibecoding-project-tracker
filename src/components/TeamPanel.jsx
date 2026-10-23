@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AlertTriangle, Trash2, UserPlus, X } from 'lucide-react';
 import Avatar from './Avatar.jsx';
 import Dialog from './Dialog.jsx';
@@ -31,6 +31,17 @@ export default function TeamPanel({ team, tasks, onAdd, onRemove, onClose }) {
   const [errors, setErrors] = useState({});
   const [confirmingId, setConfirmingId] = useState(null);
   const fieldRefs = { name: useRef(null), email: useRef(null), githubUsername: useRef(null) };
+  const keepRef = useRef(null);
+  const removeRefs = useRef({});
+  const lastConfirmingId = useRef(null);
+
+  // Focus follows the inline remove confirmation: "Keep" when it opens, then
+  // back to that member's Remove button, or the Name field if they were removed.
+  useEffect(() => {
+    if (confirmingId) keepRef.current?.focus();
+    else if (lastConfirmingId.current) (removeRefs.current[lastConfirmingId.current] ?? fieldRefs.name.current)?.focus();
+    lastConfirmingId.current = confirmingId;
+  }, [confirmingId]);
 
   function update(field) {
     return (e) => {
@@ -63,7 +74,7 @@ export default function TeamPanel({ team, tasks, onAdd, onRemove, onClose }) {
 
   return (
     <Dialog labelledBy="team-panel-title" onClose={onClose}>
-      <header className="flex items-start justify-between border-b border-line px-5 py-4">
+      <div className="flex items-start justify-between border-b border-line px-5 py-4">
         <div>
           <h2 id="team-panel-title" className="text-base font-semibold text-ink">
             Team
@@ -78,9 +89,9 @@ export default function TeamPanel({ team, tasks, onAdd, onRemove, onClose }) {
           className="rounded p-1 text-ink-soft hover:bg-muted-bg hover:text-ink focus:outline-none focus:ring-2 focus:ring-brand"
         >
           <X aria-hidden="true" className="h-5 w-5" />
-          <span className="sr-only">Close</span>
+          <span className="sr-only">Close Team panel</span>
         </button>
-      </header>
+      </div>
 
       {team.members.length === 0 ? (
         <p className="m-5 rounded border border-dashed border-line p-4 text-center text-sm text-muted">
@@ -104,6 +115,7 @@ export default function TeamPanel({ team, tasks, onAdd, onRemove, onClose }) {
                   <span className="shrink-0 text-xs text-muted">{plural(count)}</span>
                   {!confirming && (
                     <button
+                      ref={(el) => (removeRefs.current[member.id] = el)}
                       type="button"
                       onClick={() => setConfirmingId(member.id)}
                       className="flex shrink-0 items-center gap-1 rounded px-2 py-1 text-xs font-medium text-danger-text hover:bg-danger-soft focus:outline-none focus:ring-2 focus:ring-danger"
@@ -115,7 +127,7 @@ export default function TeamPanel({ team, tasks, onAdd, onRemove, onClose }) {
                 </div>
                 {confirming && (
                   <div className="flex flex-col gap-3 bg-danger-soft px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="flex items-start gap-2 text-base text-ink">
+                    <p id={`remove-${member.id}-question`} className="flex items-start gap-2 text-base text-ink">
                       <AlertTriangle aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-danger" />
                       {count > 0
                         ? `Remove ${member.name} from the team? Their ${plural(count)} will become unassigned.`
@@ -124,7 +136,8 @@ export default function TeamPanel({ team, tasks, onAdd, onRemove, onClose }) {
                     <div className="flex shrink-0 items-center gap-3">
                       <button
                         type="button"
-                        autoFocus
+                        ref={keepRef}
+                        aria-describedby={`remove-${member.id}-question`}
                         onClick={() => setConfirmingId(null)}
                         className="rounded px-2 py-1 text-sm font-medium text-ink-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-brand"
                       >

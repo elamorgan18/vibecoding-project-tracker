@@ -7,11 +7,15 @@ const FOCUSABLE =
  * Accessible modal shell shared by the task modal and the Team panel.
  * Focuses `initialFocusRef` (or the dialog itself) on open, keeps Tab inside,
  * closes on Escape or a backdrop click, and returns focus to the opener.
+ * If the opener is gone by then (e.g. a task card that moved column or was
+ * deleted), focus goes to what `fallbackFocus()` returns instead.
  */
-export default function Dialog({ labelledBy, onClose, initialFocusRef, className = 'max-w-lg', children }) {
+export default function Dialog({ labelledBy, onClose, initialFocusRef, fallbackFocus, className = 'max-w-lg', children }) {
   const dialogRef = useRef(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+  const fallbackRef = useRef(fallbackFocus);
+  fallbackRef.current = fallbackFocus;
 
   useEffect(() => {
     const opener = document.activeElement;
@@ -39,7 +43,8 @@ export default function Dialog({ labelledBy, onClose, initialFocusRef, className
     document.addEventListener('keydown', onKeyDown);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
-      opener?.focus?.();
+      const target = opener?.isConnected ? opener : fallbackRef.current?.();
+      target?.focus?.();
     };
   }, []);
 

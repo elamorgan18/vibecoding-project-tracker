@@ -23,7 +23,7 @@ export default function Insights({ tasks, members, projectName, isDark }) {
   const rows = toolStats(tasks);
 
   return (
-    <main aria-labelledby="insights-title" className="flex flex-col gap-4">
+    <section aria-labelledby="insights-title" className="flex flex-col gap-4">
       <div>
         <h2 id="insights-title" className="text-lg font-semibold text-ink">
           Insights
@@ -43,6 +43,6 @@ export default function Insights({ tasks, members, projectName, isDark }) {
           <BestWorstInsight rows={rows} />
         </div>
       </div>
-    </main>
+    </section>
   );
 }

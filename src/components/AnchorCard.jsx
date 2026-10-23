@@ -120,7 +120,7 @@ export default function AnchorCard({ anchor, onSave }) {
             </button>
           </div>
           {error && (
-            <p id={errorId} className="mt-1 flex items-start gap-1 text-sm text-danger-text">
+            <p id={errorId} role="alert" className="mt-1 flex items-start gap-1 text-sm text-danger-text">
               <AlertCircle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
               {error}
             </p>
