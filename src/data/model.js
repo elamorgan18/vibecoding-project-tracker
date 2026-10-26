@@ -1,9 +1,10 @@
 /**
  * Data model for the tracker.
  *
- * Shape: Team 1─* Project 1─* Task (and Project 1─4 Anchor). There is one team and one project for now,
- * but tasks point at a project and projects point at a team, so more of each
- * can be added later without reshaping stored data.
+ * Shape: Team 1─* Project 1─* Task (and Project 1─4 Anchor). The header's
+ * team switcher shows one team at a time, with that team's first project.
+ * Tasks point at a project and projects point at a team, so more projects
+ * per team can be added later without reshaping stored data.
  */
 
 /**
@@ -81,4 +82,6 @@ export const STORAGE_KEYS = {
   theme: 'vibetracker.theme',
   // { [stageId]: true } for each board column the user has collapsed.
   collapsedColumns: 'vibetracker.collapsedColumns',
+  // Team.id picked in the header's team switcher; null = the first team.
+  currentTeam: 'vibetracker.currentTeam',
 };

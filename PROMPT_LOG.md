@@ -526,3 +526,56 @@ Finish with a report listing everything you checked, everything you changed, and
 ````
 
 **Summary:** Demo seed cut to 14 tasks / 4 members (`src/data/seed.js`): best AI Claude 80%, lowest Gemini 33%, Lovable unranked, Cursor suggested for features and Claude for bugs. The header title is now a button back to the board, with a focus-only skip link, `nav` and a single `main`, a per-view `<title>` and a screen-reader-only announcer for saved / moved / deleted tasks (`src/App.jsx`). Accessibility fixes, none visible: full card names (`TaskCard.jsx`), column names with task counts (`Column.jsx`), focus goes back to a card even after it moves column (`Dialog.jsx`, `TaskModal.jsx`), focus handling in the delete / remove prompts (`TaskModal.jsx`, `TeamPanel.jsx`), dialog `<header>`/`<footer>` changed to `div`s, error messages use `role="alert"` (`FormField.jsx`, `AnchorCard.jsx`), plus more specific labels and descriptions (`HandOffMenu.jsx`, `Toast.jsx`, `Board.jsx`, `Insights.jsx`). axe-core reports no violations on the board, modal and Insights, in light and dark mode. Positions of the header and modal are pixel-identical to HEAD. `npm run build` passes.
+
+### 2026-10-23 15:23 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+what would the c4 architecture model be for this project
+````
+
+**Summary:** Question only. Described the C4 model (context, containers, components, code) from the current source in chat. No source files changed; only `PROMPT_LOG.md` was appended.
+
+### 2026-10-23 15:31 (GMT+1)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+can you give me the context of those diagrams so that i have the notes i need
+````
+
+**Summary:** Question only. Wrote notes in chat for each C4 level (scope, elements, relationships, key points), checked against `src/data/model.js`, `src/hooks/useLocalStorage.js` and the component headers. No source files changed; only `PROMPT_LOG.md` was appended.
+
+### 2026-10-26 (GMT)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Make these changes, keeping the existing design, accessibility and data unchanged:
+1. Replace the "Demo Team · Campus Events App" subtitle under the app title with a team/project switcher in the same top-left position. Use a menu button (same pattern as the existing "Hand off to…" menu), not a native select, so arrow keys move through options and only Enter or click switches team. Give it an accessible name like "Current team: Demo Team, change team" and a target of at least 24 by 24 pixels.
+2. Add a second sample team and project with its own members and a few tasks. The board, Team panel and Insights should update when the team is switched.
+3. When the team changes, announce "Switched to [team name]" in a polite live region and include the team name in the browser tab title.
+4. Self-host the Inter font instead of loading it from Google Fonts, so no third-party requests are made.
+Then run the existing checks and redeploy to Vercel.
+````
+
+**Summary:** New `TeamSwitcher.jsx` (listbox menu button in the subtitle's place, 24px tall, only Enter/click switches) wired into `App.jsx` with the chosen team saved under `vibetracker.currentTeam` (`model.js`), a "Switched to …" announcement and the team name in the tab title. Second sample team "Studio Team · Study Buddy Chatbot" (3 members, 5 tasks) in `seed.js`, added once to existing saved data without changing it; member IDs are now unique across teams (`team.js`). Inter and JetBrains Mono are bundled via `@fontsource` (`main.jsx`, `package.json`) and the Google Fonts links are removed from `index.html`. `npm run build` passes; axe reports no violations; no third-party requests. Not redeployed: Vercel deploys from GitHub, which needs a push by the developer.
+
+### 2026-10-26 (GMT)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+could you also make sure that the due dates wont go to overdue too soon
+````
+
+**Summary:** The overdue rule (`due.js`) was already correct; demo dates are fixed on the first visit, so open demo tasks soon turned overdue. Developer chose to push demo dates further out: open tasks in `src/data/seed.js` are now due 7–14 days out, with one "Due in 2 days" per team and the two intentionally overdue tasks unchanged. `npm run build` passes.

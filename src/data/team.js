@@ -9,11 +9,13 @@ function updateMembers(teams, teamId, update) {
 
 /**
  * Add a member to a team, giving them the next unused avatar colour.
+ * The ID is unique across all teams, since tasks point at members by ID.
  * Returns the new teams array and the created member.
  */
 export function addMember(teams, teamId, values) {
   const team = teams.find((t) => t.id === teamId);
-  const member = { id: nextId(team.members, 'member'), ...values, avatarColor: nextAvatarColor(team.members) };
+  const id = nextId(teams.flatMap((t) => t.members), 'member');
+  const member = { id, ...values, avatarColor: nextAvatarColor(team.members) };
   return { teams: updateMembers(teams, teamId, (members) => [...members, member]), member };
 }
 

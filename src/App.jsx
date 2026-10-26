@@ -4,7 +4,7 @@ import { buildBriefing } from './data/briefing.js';
 import { hasFilters, matchesFilters, NO_FILTERS } from './data/filters.js';
 import { contextChanged, contextValues, NEW_TASK_CONTEXT } from './data/context.js';
 import { STAGES, STORAGE_KEYS } from './data/model.js';
-import { SEED_TEAMS, SEED_PROJECTS, SEED_TASKS, SEED_ANCHORS } from './data/seed.js';
+import { SEED_TEAMS, SEED_PROJECTS, SEED_TASKS, SEED_ANCHORS, withSecondTeam } from './data/seed.js';
 import { projectAnchors, setAnchorUrl } from './data/anchors.js';
 import { todayISO } from './data/dates.js';
 import { moveTask, nextTaskId, reassignTask, removeTask, unassignMember, upsertTask } from './data/tasks.js';
@@ -18,6 +18,7 @@ import TeamMembersStrip from './components/TeamMembersStrip.jsx';
 import FilterBar from './components/FilterBar.jsx';
 import TaskModal from './components/TaskModal.jsx';
 import TeamPanel from './components/TeamPanel.jsx';
+import TeamSwitcher from './components/TeamSwitcher.jsx';
 import ThemeToggle from './components/ThemeToggle.jsx';
 import ViewSwitch from './components/ViewSwitch.jsx';
 import Toast from './components/Toast.jsx';
@@ -36,7 +37,7 @@ const Insights = lazy(() => import('./components/insights/Insights.jsx'));
  *   src/hooks/useTheme.js       light / dark mode (ThemeToggle in the header)
  *   src/data/filters.js         board filter matching (FilterBar)
  *   src/data/insights.js        Insights view stats + suggested AI tool (M12)
- *   src/components/             AnchorBoard → AnchorCard, TeamMembersStrip, FilterBar, Board → Column → TaskCard,
+ *   src/components/             TeamSwitcher, AnchorBoard → AnchorCard, TeamMembersStrip, FilterBar, Board → Column → TaskCard,
  *                               TaskModal, TeamPanel, Toast (+ shared Dialog,
  *                               FormField, Avatar, TypeBadge), ViewSwitch,
  *                               insights/ (Insights → Progress, Tool, BestWorst)
@@ -45,11 +46,21 @@ const Insights = lazy(() => import('./components/insights/Insights.jsx'));
  */
 export default function App() {
   const [teams, setTeams, teamsError] = useLocalStorage(STORAGE_KEYS.teams, SEED_TEAMS);
-  const [projects] = useLocalStorage(STORAGE_KEYS.projects, SEED_PROJECTS);
+  const [projects, setProjects] = useLocalStorage(STORAGE_KEYS.projects, SEED_PROJECTS);
   const [tasks, setTasks, tasksError] = useLocalStorage(STORAGE_KEYS.tasks, SEED_TASKS);
   const [anchors, setAnchors, anchorsError] = useLocalStorage(STORAGE_KEYS.anchors, SEED_ANCHORS);
   const storageError = tasksError ?? teamsError ?? anchorsError;
   const [isDark, toggleTheme] = useTheme();
+  const [currentTeamId, setCurrentTeamId] = useLocalStorage(STORAGE_KEYS.currentTeam, null);
+
+  // Data saved before the second sample team existed gets it added (once).
+  useEffect(() => {
+    const added = withSecondTeam({ teams, projects, tasks });
+    if (!added) return;
+    setTeams(added.teams);
+    setProjects(added.projects);
+    setTasks(added.tasks);
+  }, []);
 
   // Members saved before avatar colours existed get one (once, then stored).
   useEffect(() => {
@@ -70,13 +81,17 @@ export default function App() {
   // Board filters (FilterBar). Kept for this visit only, not saved.
   const [filters, setFilters] = useState(NO_FILTERS);
 
-  useEffect(() => {
-    document.title = `${view === 'insights' ? 'Insights' : 'Board'} – Vibecoding Project Tracker`;
-  }, [view]);
+  // One project per team for now: the team switcher in the header picks the
+  // team, and the board shows that team's first project.
+  const teamOptions = teams
+    .map((t) => ({ team: t, project: projects.find((p) => p.teamId === t.id) }))
+    .filter((o) => o.project);
+  const { team, project } = teamOptions.find((o) => o.team.id === currentTeamId) ?? teamOptions[0];
 
-  // One team, one project for now. A project switcher can replace this later.
-  const project = projects[0];
-  const team = teams.find((t) => t.id === project.teamId);
+  useEffect(() => {
+    document.title = `${view === 'insights' ? 'Insights' : 'Board'} – ${team.name} – Vibecoding Project Tracker`;
+  }, [view, team.name]);
+
   const projectTasks = tasks.filter((task) => task.projectId === project.id);
   const visibleTasks = projectTasks.filter((task) => matchesFilters(task, filters));
 
@@ -93,6 +108,14 @@ export default function App() {
     closeModal();
     setTeamOpen(false);
     setView('board');
+  }
+
+  function switchTeam(teamId) {
+    const next = teams.find((t) => t.id === teamId);
+    setCurrentTeamId(teamId);
+    // Member filters belong to the old team.
+    setFilters(NO_FILTERS);
+    announce(`Switched to ${next.name}`);
   }
 
   function skipToMain(e) {
@@ -205,9 +228,7 @@ export default function App() {
               Vibecoding Project Tracker
             </button>
           </h1>
-          <p className="mt-1 text-sm text-muted">
-            {team.name} · {project.name}
-          </p>
+          <TeamSwitcher options={teamOptions} currentTeamId={team.id} onSelect={switchTeam} />
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <nav aria-label="Views">
@@ -248,11 +269,11 @@ export default function App() {
       <main id="main" tabIndex={-1} className="focus:outline-none">
         {view === 'insights' ? (
           <Suspense fallback={<p className="text-sm text-muted">Loading insights…</p>}>
-            <Insights tasks={projectTasks} members={team.members} projectName={project.name} isDark={isDark} />
+            <Insights key={project.id} tasks={projectTasks} members={team.members} projectName={project.name} isDark={isDark} />
           </Suspense>
         ) : (
           <>
-            <AnchorBoard anchors={projectAnchors(anchors, project.id)} onSave={handleSaveAnchor} />
+            <AnchorBoard key={project.id} anchors={projectAnchors(anchors, project.id)} onSave={handleSaveAnchor} />
 
             <TeamMembersStrip members={team.members} tasks={projectTasks} onOpenTask={openModal} />
 
