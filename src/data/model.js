@@ -84,4 +84,7 @@ export const STORAGE_KEYS = {
   collapsedColumns: 'vibetracker.collapsedColumns',
   // Team.id picked in the header's team switcher; null = the first team.
   currentTeam: 'vibetracker.currentTeam',
+  // Mock login (auth.js): Account[], and who is logged in (Session).
+  accounts: 'vibetracker.accounts',
+  session: 'vibetracker.session',
 };

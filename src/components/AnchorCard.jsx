@@ -30,12 +30,13 @@ function AnchorStatus({ linked }) {
 /**
  * One deliverable slot. Empty: a URL field + Save. Linked: the link (opens in
  * a new tab) with Change / Remove. Focus follows the switch between the two.
+ * Without `canEdit` only the link (or "A team lead adds this link.") shows.
  */
-export default function AnchorCard({ anchor, onSave }) {
+export default function AnchorCard({ anchor, canEdit = true, onSave }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
   const [error, setError] = useState(null);
-  const showForm = !anchor.url || editing;
+  const showForm = canEdit && (!anchor.url || editing);
 
   const inputRef = useRef(null);
   const linkRef = useRef(null);
@@ -131,6 +132,8 @@ export default function AnchorCard({ anchor, onSave }) {
             </button>
           )}
         </form>
+      ) : !anchor.url ? (
+        <p className="mt-3 text-sm text-muted">A team lead adds this link.</p>
       ) : (
         <>
           <a
@@ -146,14 +149,16 @@ export default function AnchorCard({ anchor, onSave }) {
             <span className="truncate">{displayLink(anchor.url)}</span>
             <span className="sr-only"> (opens in a new tab)</span>
           </a>
-          <div className="mt-2 flex gap-3">
-            <button type="button" onClick={startEditing} className={textButton}>
-              Change<span className="sr-only"> {anchor.label} link</span>
-            </button>
-            <button type="button" onClick={remove} className={textButton}>
-              Remove<span className="sr-only"> {anchor.label} link</span>
-            </button>
-          </div>
+          {canEdit && (
+            <div className="mt-2 flex gap-3">
+              <button type="button" onClick={startEditing} className={textButton}>
+                Change<span className="sr-only"> {anchor.label} link</span>
+              </button>
+              <button type="button" onClick={remove} className={textButton}>
+                Remove<span className="sr-only"> {anchor.label} link</span>
+              </button>
+            </div>
+          )}
         </>
       )}
     </li>

@@ -319,6 +319,8 @@ Cards are tinted by type (`feature-soft` or `bug-soft`) with a 1px border in the
 
 **Suggested AI tool (task modal).** Above the AI tool field there is a `brand-soft` note with a `brand/40` border and a Lucide `Lightbulb` icon: "**Suggested AI tool for bugs: Claude.** Claude worked on 4 of 5 bug tasks (80%). Based on this team's history, not a general ranking." It follows the Type toggle (feature or bug). It picks the tool with the best success rate on past tasks of that type, ranked by the same rules as the best/lowest cards. The task being edited doesn't count towards itself. A small secondary "Use Claude" button fills in the AI tool select and moves focus to it, then it shows "✓ Selected" in `success-text`. With too little history it says "No suggested AI tool for features yet." and explains the 3-task minimum. The AI tool select is `aria-describedby` the note.
 
+**Login screen and roles (mock login, prototype only).** When no one is logged in, the board is replaced by a login screen on `surface`: the theme toggle top right, the wordmark centred, and a centred `card` panel (`max-w-md`, `line` border) with the `h1` "Log in" or "Create an account". Inputs, labels and inline errors are the same as the task modal's (`FormField`), and the submit button is the usual solid `brand` button at full width (Lucide `LogIn` / `UserPlus`). Password fields have an eye button (Lucide `Eye` / `EyeOff`, `aria-label="Show password"` + `aria-pressed`). Under the login form, the demo accounts sit in a `brand-soft` info panel with a `brand/40` border and a Lucide `Info` icon, like the suggested AI tool note: each role's email and password in JetBrains Mono, a secondary "Use this account" button, and a `brand` "Continue as guest" text button. In the header, a user menu (the last item) shows the user's avatar (§2.7; dashed placeholder for a guest), name and role, and opens a `card` popover with name, sign-in email, a role badge and "Log out". The role badge is a `muted-bg` pill in `ink-soft` with an icon and the words "Role: {role}" (Lucide `Code2` Developer, `ShieldCheck` Team lead, `UserRound` Guest (demo)), so the role never relies on colour. For a Developer, the Team panel has no Remove buttons or add form, and the deliverable cards have no link fields or Change / Remove. A short `ink-soft` note says why in each place.
+
 ## 5. Voice / microcopy
 
 Calm, short, second person. No exclamation marks unless something is actually wrong.
@@ -357,6 +359,12 @@ Calm, short, second person. No exclamation marks unless something is actually wr
 | Context box: copy failed (danger) | "Couldn't copy. Select the text and copy it manually." |
 | Save failed, storage full (danger) | "Couldn't save. Your browser's storage for this site is full. Your text is still here…" |
 | Storage-full page banner (danger) | "Your latest changes aren't saved. …They'll be lost if you close or reload this page." |
+| Login screen: headings / switch links | "Log in" / "Create an account"; "No account yet? Sign up" / "Already have an account? Log in" |
+| Login: demo panel | "Trying the prototype? Use a demo account" / "Use this account" / "Team leads can also manage team members and deliverable links." / "Continue as guest to use the whole board without an account." |
+| Login: errors (danger) | "Email or password is incorrect." / "Enter a valid email, like name@example.com." / "Enter your password." / "Use at least 6 characters." / "An account with this email already exists. Log in instead." |
+| Login: screen-reader announcements | "There are {n} problems: …" / "{Role} demo details filled in." / "Logged in as {name}, {role}." / "Logged out." |
+| Role labels / badge | "Developer", "Team lead", "Guest (demo)" / "Role: {role}" |
+| Developer role: locked controls | "Only team leads can add or remove members." / "Only team leads can edit deliverable links." / "A team lead adds this link." |
 
 ## 6. Logo / wordmark
 

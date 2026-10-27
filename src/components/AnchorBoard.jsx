@@ -1,7 +1,11 @@
 import AnchorCard from './AnchorCard.jsx';
 
-/** The four pinned deliverable links (Presentation, Demo, Report, Documentation). */
-export default function AnchorBoard({ anchors, onSave }) {
+/**
+ * The four pinned deliverable links (Presentation, Demo, Report, Documentation).
+ * Without `canEdit` (the Developer role) the links are read-only and the
+ * summary says why.
+ */
+export default function AnchorBoard({ anchors, canEdit = true, onSave }) {
   const linked = anchors.filter((a) => a.url).length;
   return (
     <section aria-labelledby="deliverables-heading" className="mb-6">
@@ -10,12 +14,13 @@ export default function AnchorBoard({ anchors, onSave }) {
           Deliverables
         </h2>
         <p className="text-sm text-muted">
-          {linked} of {anchors.length} linked. Paste each final link here as you produce it.
+          {linked} of {anchors.length} linked.{' '}
+          {canEdit ? 'Paste each final link here as you produce it.' : 'Only team leads can edit deliverable links.'}
         </p>
       </div>
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {anchors.map((anchor) => (
-          <AnchorCard key={anchor.id} anchor={anchor} onSave={(url) => onSave(anchor.id, url)} />
+          <AnchorCard key={anchor.id} anchor={anchor} canEdit={canEdit} onSave={(url) => onSave(anchor.id, url)} />
         ))}
       </ul>
     </section>

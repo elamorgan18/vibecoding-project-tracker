@@ -156,6 +156,8 @@ Fill in:
 - Multi-team support.
 - Real-time collaboration.
 
+> **Change (added later):** a *mock* login with roles was added as an extra (see §14, FR-AUTH). It is a prototype only: accounts live in localStorage, with no backend and no real authentication, so real authentication and accounts are still out of scope.
+
 ## 13. Definition of done
 
 The hackathon is "done" when all 13 milestone tags are pushed to your repo and visible on the dashboard. The pitch is "done" when:
@@ -163,6 +165,14 @@ The hackathon is "done" when all 13 milestone tags are pushed to your repo and v
 - The board loads on Vercel without errors.
 - The "Copy as Prompt Context" demo works on stage.
 - 5 min pitch is rehearsed.
+
+## 14. Added requirements
+
+| ID | Requirement |
+|---|---|
+| FR-AUTH | Users can log in and see their role. Mock login and sign-up (name, email, password, role) stored in localStorage, passwords hashed with SHA-256. Two demo accounts (Developer, Team lead) and a guest/demo mode let an assessor get in without registering. The session lasts until the user logs out. |
+| FR-AUTH-ROLES | Each role sees only what it can do. Developer: create, edit and move tasks and edit AI context. Team lead: also add and remove team members and edit deliverable links. Guest (demo): the whole board. A control a role can't use is hidden, with a short explanation. |
+| FR-AUTH-PROFILE | Each account is linked to a team member. The header shows a user menu with the user's avatar, name and role, a profile with their email and a "Role: …" badge, and "Log out". |
 
 ---
 

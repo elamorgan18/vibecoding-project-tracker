@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertTriangle, Trash2, UserPlus, X } from 'lucide-react';
+import { AlertTriangle, Lock, Trash2, UserPlus, X } from 'lucide-react';
 import Avatar from './Avatar.jsx';
 import Dialog from './Dialog.jsx';
 import FormField, { inputBorder, inputClass } from './FormField.jsx';
@@ -25,8 +25,11 @@ function validate(values, members) {
   return errors;
 }
 
-/** View, add and remove team members. */
-export default function TeamPanel({ team, tasks, onAdd, onRemove, onClose }) {
+/**
+ * View, add and remove team members. Without `canManage` (the Developer
+ * role) the list is read-only and a note says why.
+ */
+export default function TeamPanel({ team, tasks, canManage = true, onAdd, onRemove, onClose }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [confirmingId, setConfirmingId] = useState(null);
@@ -109,11 +112,18 @@ export default function TeamPanel({ team, tasks, onAdd, onRemove, onClose }) {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-ink">{member.name}</p>
                     <p className="truncate text-xs text-muted">
-                      {member.email} · <span className="font-mono">@{member.githubUsername}</span>
+                      {member.email}
+                      {/* Members who joined by signing up have no GitHub username yet. */}
+                      {member.githubUsername && (
+                        <>
+                          {' '}
+                          · <span className="font-mono">@{member.githubUsername}</span>
+                        </>
+                      )}
                     </p>
                   </div>
                   <span className="shrink-0 text-xs text-muted">{plural(count)}</span>
-                  {!confirming && (
+                  {canManage && !confirming && (
                     <button
                       ref={(el) => (removeRefs.current[member.id] = el)}
                       type="button"
@@ -163,62 +173,69 @@ export default function TeamPanel({ team, tasks, onAdd, onRemove, onClose }) {
         </ul>
       )}
 
-      <form onSubmit={handleSubmit} noValidate className="border-t border-line px-5 py-4">
-        <h3 className="mb-3 text-sm font-semibold text-ink">Add a member</h3>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <FormField id="member-name" label="Name" error={errors.name}>
+      {!canManage ? (
+        <p className="flex items-start gap-2 border-t border-line px-5 py-4 text-sm text-ink-soft">
+          <Lock aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
+          Only team leads can add or remove members.
+        </p>
+      ) : (
+        <form onSubmit={handleSubmit} noValidate className="border-t border-line px-5 py-4">
+          <h3 className="mb-3 text-sm font-semibold text-ink">Add a member</h3>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <FormField id="member-name" label="Name" error={errors.name}>
+                <input
+                  ref={fieldRefs.name}
+                  id="member-name"
+                  type="text"
+                  autoComplete="off"
+                  value={form.name}
+                  onChange={update('name')}
+                  aria-invalid={!!errors.name}
+                  aria-describedby={errors.name ? 'member-name-error' : undefined}
+                  className={`${inputClass} ${inputBorder(errors.name)}`}
+                />
+              </FormField>
+            </div>
+            <FormField id="member-email" label="Email" error={errors.email}>
               <input
-                ref={fieldRefs.name}
-                id="member-name"
+                ref={fieldRefs.email}
+                id="member-email"
+                type="email"
+                autoComplete="off"
+                value={form.email}
+                onChange={update('email')}
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? 'member-email-error' : undefined}
+                className={`${inputClass} ${inputBorder(errors.email)}`}
+              />
+            </FormField>
+            <FormField id="member-github" label="GitHub username" error={errors.githubUsername}>
+              <input
+                ref={fieldRefs.githubUsername}
+                id="member-github"
                 type="text"
                 autoComplete="off"
-                value={form.name}
-                onChange={update('name')}
-                aria-invalid={!!errors.name}
-                aria-describedby={errors.name ? 'member-name-error' : undefined}
-                className={`${inputClass} ${inputBorder(errors.name)}`}
+                spellCheck={false}
+                value={form.githubUsername}
+                onChange={update('githubUsername')}
+                aria-invalid={!!errors.githubUsername}
+                aria-describedby={errors.githubUsername ? 'member-github-error' : undefined}
+                className={`${inputClass} font-mono ${inputBorder(errors.githubUsername)}`}
               />
             </FormField>
           </div>
-          <FormField id="member-email" label="Email" error={errors.email}>
-            <input
-              ref={fieldRefs.email}
-              id="member-email"
-              type="email"
-              autoComplete="off"
-              value={form.email}
-              onChange={update('email')}
-              aria-invalid={!!errors.email}
-              aria-describedby={errors.email ? 'member-email-error' : undefined}
-              className={`${inputClass} ${inputBorder(errors.email)}`}
-            />
-          </FormField>
-          <FormField id="member-github" label="GitHub username" error={errors.githubUsername}>
-            <input
-              ref={fieldRefs.githubUsername}
-              id="member-github"
-              type="text"
-              autoComplete="off"
-              spellCheck={false}
-              value={form.githubUsername}
-              onChange={update('githubUsername')}
-              aria-invalid={!!errors.githubUsername}
-              aria-describedby={errors.githubUsername ? 'member-github-error' : undefined}
-              className={`${inputClass} font-mono ${inputBorder(errors.githubUsername)}`}
-            />
-          </FormField>
-        </div>
-        <div className="mt-4 flex justify-end">
-          <button
-            type="submit"
-            className="flex items-center gap-1.5 rounded bg-brand px-4 py-2 text-sm font-medium text-on-accent hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
-          >
-            <UserPlus aria-hidden="true" className="h-4 w-4" />
-            Add member
-          </button>
-        </div>
-      </form>
+          <div className="mt-4 flex justify-end">
+            <button
+              type="submit"
+              className="flex items-center gap-1.5 rounded bg-brand px-4 py-2 text-sm font-medium text-on-accent hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+            >
+              <UserPlus aria-hidden="true" className="h-4 w-4" />
+              Add member
+            </button>
+          </div>
+        </form>
+      )}
     </Dialog>
   );
 }

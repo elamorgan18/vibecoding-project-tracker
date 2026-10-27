@@ -8,7 +8,20 @@ This is Ela Morgan's personal project repo for the Vibecoding Project Tracker ([
 
 **[vibecoding-project-tracker-ela-morg.vercel.app](https://vibecoding-project-tracker-ela-morg.vercel.app/)**
 
-No login or registration is needed. Open the link and the board loads with demo data. Your changes are saved in your own browser (localStorage).
+The app opens on a mock login screen. You don't need to register: log in with one of the demo accounts below, or choose **Continue as guest**. The board loads with demo data. Your changes are saved in your own browser (localStorage).
+
+## Demo accounts
+
+| Role | Email | Password | Linked team member |
+|---|---|---|---|
+| Developer | `dev@demo.com` | `demo123` | Sam Rivera |
+| Team lead | `lead@demo.com` | `demo123` | Priya Shah |
+
+- **Developer:** create, edit and move tasks and edit their AI context.
+- **Team lead:** everything a Developer can do, plus add and remove team members and edit deliverable links.
+- **Guest (demo):** "Continue as guest" on the login screen opens the whole board with no account.
+
+On the login screen, each account has a **Use this account** button that fills in the details for you. This is a prototype: accounts live in your browser's localStorage, and passwords are stored only as SHA-256 hashes. There is no backend and no real security.
 
 ## AI tools used
 

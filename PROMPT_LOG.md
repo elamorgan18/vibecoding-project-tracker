@@ -579,3 +579,70 @@ could you also make sure that the due dates wont go to overdue too soon
 ````
 
 **Summary:** The overdue rule (`due.js`) was already correct; demo dates are fixed on the first visit, so open demo tasks soon turned overdue. Developer chose to push demo dates further out: open tasks in `src/data/seed.js` are now due 7–14 days out, with one "Due in 2 days" per team and the two intentionally overdue tasks unchanged. `npm run build` passes.
+
+## Extra – login-roles
+
+### 2026-10-27 12:54 (GMT)
+
+**Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+
+**Prompt:**
+
+````
+Add a mock login and sign-up flow with user roles and a demo login hint. This is a prototype to show the concept. There is no real backend or security: store everything in localStorage, alongside the existing vibetracker.* keys.
+
+1. Screens
+- The login screen has Email and Password fields, a "Log in" button, and a link to switch to "Sign up".
+- The sign-up screen has Name, Email, Password and Role (dropdown: Developer or Team lead), a "Create account" button, and a link back to "Log in".
+
+2. Demo login hint (so my lecturer can get in without signing up)
+Directly below the login form, add one demo section:
+- Heading (h2): "Trying the prototype? Use a demo account"
+- Developer: email dev@demo.com, password demo123
+- Team lead: email lead@demo.com, password demo123
+- One line: "Team leads can also manage team members and deliverable links."
+- Next to each account, a "Use this account" button that fills in the email and password fields without submitting, then moves focus to the Log in button.
+- Below them, a "Continue as guest" option that goes straight into the app.
+- Show the credentials as selectable text in the monospace font. Style the section as a subtle info panel, not an error or warning.
+- Keep the existing demo data exactly as it is: same tasks, team members and deliverables. Don't add a "Load demo data" or "Reset" button.
+- The two demo accounts are created automatically if they don't exist, and are linked to two of the existing mock team members. Don't change or reseed any tasks.
+
+3. Roles
+- Developer: can create, edit and move tasks and edit AI context.
+- Team lead: everything a Developer can do, plus adding and removing team members and editing deliverable links.
+- Guest: can use the whole board (so the assessor can test everything), labelled "Guest (demo)".
+- If a role can't do something, hide that control or disable it with a short explanation (e.g. "Only team leads can remove members"). Never fail silently.
+
+4. Linking accounts to the app
+- Each account is linked to a team member record (name, email, GitHub username, avatar colour). The demo accounts use existing members. A new sign-up creates a new matching team member without changing anything else.
+- In the header, add a user menu showing the user's avatar, name and role, with a "Log out" option.
+- In my info/profile section, show my name, email and role (e.g. a "Role: Developer" badge).
+- Keep the user logged in across reloads until they log out. If no one is logged in, show the login screen. The "Vibe Coding" logo still goes to the board when logged in.
+
+5. Validation (simple, prototype level)
+- The email must look valid, the password must be at least 6 characters, and an email can't be registered twice.
+- A wrong email or password shows "Email or password is incorrect".
+- Don't store passwords in plain text: hash them with the Web Crypto API (SHA-256). Add a code comment saying a real product would use a backend with proper authentication (as in our C4 container diagram).
+
+6. Style
+Match the existing design exactly: use the Tailwind tokens from tailwind.config.js, the fonts, spacing, button and input styles from DESIGN.md, and both light and dark mode. The login screen should look like part of the same app (logo at the top, centred card). Don't change the visual design of any existing screen apart from adding the user menu and the role badge.
+
+7. Accessibility
+- Every input has a visible <label> tied to it, with the right autocomplete attributes (email, current-password, new-password, name).
+- Errors are shown as text next to the field, linked with aria-describedby and aria-invalid="true". On submit, move focus to the first field with an error, and announce form errors through the existing aria-live region.
+- Add a show/hide password toggle button with aria-label and aria-pressed.
+- The demo fill buttons have clear accessible names (e.g. "Use Developer demo account"). After filling, announce "Developer demo details filled in" through the aria-live region.
+- Everything works by keyboard alone, with a visible focus ring. Enter submits the form.
+- The login page has one h1, a descriptive page title, and html lang="en". After logging in, focus moves to the main board heading.
+- The role badge reads clearly to screen readers (e.g. "Role: Team lead"), and roles are never shown by colour alone.
+- Check contrast meets WCAG AA in both themes.
+
+8. Docs
+- Add the two demo logins to README.md under a "Demo accounts" heading, so the lecturer has them before opening the app.
+- Map this feature to a requirement ID in the PRD (add one if needed, e.g. "FR-AUTH: users can log in and see their role").
+- Fill in the factual sections of docs/decisions/login-roles.md.
+- Log this request in PROMPT_LOG.md.
+- Finish with a report listing the files changed, the demo login details, which existing team members the demo accounts are linked to, and anything you held back because it would change the existing visuals.
+````
+
+**Summary:** Mock login/sign-up with roles: new `src/data/auth.js` (SHA-256 hashing, demo accounts linked to Sam Rivera / Priya Shah, permissions), `AuthScreen.jsx` (login, sign-up, demo panel, guest) and `UserMenu.jsx` (header menu, profile, role badge). `App.jsx` gates the board behind the saved session, and `TeamPanel.jsx` / `AnchorBoard.jsx` / `AnchorCard.jsx` hide lead-only controls with a note. Smaller edits: `FormField.jsx`, `model.js`. Docs: `README.md` "Demo accounts", `PRD.md` §14 FR-AUTH, `DESIGN.md` §4/§5, new `docs/decisions/login-roles.md`. Headless Edge: 63 checks pass and axe reports no violations in either theme. `npm run build` passes.
